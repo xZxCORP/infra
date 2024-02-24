@@ -1,0 +1,5 @@
+- name: Configure docker and swarm
+  hosts: all
+  roles:
+    - docker
+    - swarm
