@@ -1,0 +1,4 @@
+- name: Configure tooling
+  hosts: masters
+  roles:
+    - portainer
