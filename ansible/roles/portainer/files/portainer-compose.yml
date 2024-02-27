@@ -1,4 +1,4 @@
-version: '3.2'
+version: '3.8'
 
 services:
   agent:
@@ -7,7 +7,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/volumes:/var/lib/docker/volumes
     networks:
-      - agent_network
+      - z_public
     deploy:
       mode: global
       placement:
@@ -23,17 +23,24 @@ services:
     volumes:
       - portainer_data:/data
     networks:
-      - agent_network
+      - z_public
     deploy:
       mode: replicated
       replicas: 1
       placement:
         constraints: [node.role == manager]
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=z_public"
+        - "traefik.http.routers.portainer.rule=Host(`portainer.zcorp.ovh`)"
+        - "traefik.http.routers.portainer.entrypoints=websecure"
+        - "traefik.http.routers.portainer.tls.certresolver=letsencrypt"
+        - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
 
 networks:
-  agent_network:
-    driver: overlay
-    attachable: true
+  z_public:
+    external: true
 
 volumes:
   portainer_data:

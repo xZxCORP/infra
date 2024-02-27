@@ -1,0 +1,31 @@
+api:
+  dashboard: true
+  insecure: true
+
+accessLog: {}
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: zcorp0902@gmail.com
+      storage: /letsencrypt/acme.json
+      caServer: https://acme-v02.api.letsencrypt.org/directory
+      httpChallenge:
+        entryPoint: web
+      # dnsChallenge:
+      #   provider: ovh
+      #   delayBeforeCheck: "10"
+
+     
+providers:
+  docker:
+    exposedByDefault: false
+    swarmMode: true

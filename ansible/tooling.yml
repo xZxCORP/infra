@@ -1,4 +1,7 @@
 - name: Configure tooling
   hosts: masters
+  vars_files:
+    - secrets.yml
   roles:
+    - traefik
     - portainer

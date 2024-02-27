@@ -53,6 +53,11 @@
     state: present
   register: __output_swarm
   when: inventory_hostname in groups['masters'][0]
+- name: Create a network
+  docker_network:
+    name: z_public
+    driver: overlay
+  when: inventory_hostname in groups['masters'][0]
 
 - name: Install nodes
   docker_swarm:

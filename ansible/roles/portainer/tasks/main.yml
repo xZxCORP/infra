@@ -23,6 +23,7 @@
   community.docker.docker_stack:
     state: present
     name: portainer
+    prune: true
     compose:
       - "/home/{{ansible_user}}/stacks_files/portainer-compose.yml"
 
