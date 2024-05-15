@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  techfreedom-frontend:
+    image: zcorp0902746/techfreedom-frontend
+    container_name: techfreedom-frontend
+    networks:
+      - z_public
+    deploy:
+      mode: replicated
+      replicas: 3
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=z_public"
+        - "traefik.http.routers.techfreedom-frontend.rule=Host(`techfreedom-frontend.zcorp.ovh`)"
+        - "traefik.http.routers.techfreedom-frontend.entrypoints=websecure"
+        - "traefik.http.routers.techfreedom-frontend.tls.certresolver=letsencrypt"
+        - "traefik.http.services.techfreedom-frontend.loadbalancer.server.port=80"
+
+
+networks:
+  z_public:
+    external: true
