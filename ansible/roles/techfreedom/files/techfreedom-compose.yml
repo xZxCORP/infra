@@ -16,7 +16,21 @@ services:
         - "traefik.http.routers.techfreedom-frontend.entrypoints=websecure"
         - "traefik.http.routers.techfreedom-frontend.tls.certresolver=letsencrypt"
         - "traefik.http.services.techfreedom-frontend.loadbalancer.server.port=80"
-
+  techfreedom-backend:
+    image: zcorp0902746/techfreedom-backend
+    container_name: techfreedom-backend
+    networks:
+      - z_public
+    deploy:
+      mode: replicated
+      replicas: 3
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=z_public"
+        - "traefik.http.routers.techfreedom-backend.rule=Host(`techfreedom-backend.zcorp.ovh`)"
+        - "traefik.http.routers.techfreedom-backend.entrypoints=websecure"
+        - "traefik.http.routers.techfreedom-backend.tls.certresolver=letsencrypt"
+        - "traefik.http.services.techfreedom-backend.loadbalancer.server.port=8090"
 
 networks:
   z_public:
