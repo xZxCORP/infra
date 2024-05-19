@@ -1,5 +1,19 @@
-- name: Configure docker and swarm
-  hosts: all
+- name: Configure masters nodes
+  hosts: masters
+  become: true
   roles:
-    - docker
-    - swarm
+    - role: docker
+    - role: consul
+      consul_server: true
+    # - role: nomad
+    #   nomad_server: true
+
+- name: Configure workers nodes
+  hosts: workers
+  become: true
+  roles:
+    - role: docker
+    - role: consul
+      consul_server: false
+    # - role: nomad
+    #   nomad_server: false

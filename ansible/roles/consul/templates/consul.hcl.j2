@@ -1,0 +1,21 @@
+datacenter = "{{ consul_datacenter }}"
+data_dir = "{{ consul_data_dir }}"
+log_level = "{{ consul_log_level }}"
+
+bind_addr = "{{ consul_bind_addr }}"
+client_addr = "0.0.0.0"
+
+{% if consul_server %}
+server = true
+bootstrap_expect = {{ consul_bootstrap_expect }}
+{% else %}
+server = false
+{% endif %}
+
+ui_config {
+  enabled = {{ consul_ui_enabled | lower }}
+}
+
+retry_join = {{ consul_retry_join | to_json }}
+
+advertise_addr = "{{ consul_bind_addr }}"

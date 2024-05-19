@@ -1,7 +1,8 @@
 api:
   dashboard: true
   insecure: true
-
+log:
+  level: DEBUG
 accessLog: {}
 entryPoints:
   web:
@@ -20,9 +21,6 @@ certificatesResolvers:
       caServer: https://acme-v02.api.letsencrypt.org/directory
       httpChallenge:
         entryPoint: web
-      # dnsChallenge:
-      #   provider: ovh
-      #   delayBeforeCheck: "10"
 
      
 providers:

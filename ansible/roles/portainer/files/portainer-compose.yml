@@ -28,7 +28,7 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints: [node.role == manager]
+        constraints: [node.role == worker]
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=z_public"
@@ -40,7 +40,8 @@ services:
 
 networks:
   z_public:
-    external: true
+    driver: overlay
+    attachable: true
 
 volumes:
   portainer_data:
