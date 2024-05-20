@@ -1,25 +1,9 @@
 ---
 # tasks file for roles/consul
-- name: Ensure unzip is installed
-  ansible.builtin.package:
-    name: unzip
+- name: Install Consul
+  ansible.builtin.apt:
+    name: consul
     state: present
-- name: Ensure iptables-persistent
-  apt:
-    name: iptables-persistent
-    state: present
-
-- name: Ensure Consul is installed
-  ansible.builtin.get_url:
-    url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_arm64.zip"
-    dest: "/tmp/consul.zip"
-    mode: '0644'
-
-- name: Unzip Consul
-  ansible.builtin.unarchive:
-    src: "/tmp/consul.zip"
-    dest: "/usr/local/bin"
-    remote_src: yes
 
 - name: Create Consul configuration directory
   ansible.builtin.file:
@@ -32,19 +16,6 @@
     src: "consul.hcl.j2"
     dest: "/etc/consul.d/consul.hcl"
     mode: '0644'
-
-- name: Upload Consul systemd service file
-  ansible.builtin.template:
-    src: "consul.service.j2"
-    dest: "/etc/systemd/system/consul.service"
-    mode: '0644'
-
-- name: Enable and start Consul
-  ansible.builtin.systemd:
-    name: consul
-    enabled: yes
-    state: started
-
 - name: Open Consul ports with iptables
   ansible.builtin.iptables:
     chain: INPUT
@@ -57,12 +28,16 @@
     - 8302
     - 8500
     - 8600
-
-
-
 - name: save current state of the firewall in system file
   community.general.iptables_state:
     ip_version: ipv4
     table: filter
     state: saved
     path: /etc/iptables/rules.v4
+
+- name: Enable and start Consul
+  ansible.builtin.systemd:
+    name: consul
+    enabled: yes
+    state: started
+

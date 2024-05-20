@@ -3,8 +3,15 @@
   become: true
   roles:
     - role: docker
+      tags: docker
+    - role: hashicorp_repo
+      tags: repo
     - role: consul
+      tags: consul
       consul_server: true
+    - role: traefik
+      tags: traefik
+
     # - role: nomad
     #   nomad_server: true
 
@@ -13,7 +20,9 @@
   become: true
   roles:
     - role: docker
+      tags: docker
     - role: consul
+      tags: consul
       consul_server: false
     # - role: nomad
     #   nomad_server: false

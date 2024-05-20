@@ -1,37 +1,33 @@
 ---
 # tasks file for roles/traefik
-- name: Ensure stack folder exist
-  ansible.builtin.file:
-    path: "/home/{{ ansible_user }}/stacks_files"
+- name: Create Traefik configuration directory
+  file:
+    path: /opt/traefik
     state: directory
-    owner: "{{ansible_user}}"
-    group: "{{ansible_user}}"
     mode: '0755'
-  become: true
-- name: Ensure traefik folder exist
-  ansible.builtin.file:
-    path: "/etc/traefik"
-    state: directory
-    owner: "{{ansible_user}}"
-    group: "{{ansible_user}}"
-    mode: '0755'
-  become: true
-- name: Déployer Traefik avec Docker Compose
-  ansible.builtin.template:
+
+- name: Copy Traefik configuration
+  template:
+    src: traefik.yml.j2
+    dest: /opt/traefik/traefik.yml
+
+- name: Copy dynamic configuration
+  template:
+    src: dynamic_conf.yml.j2
+    dest: /opt/traefik/dynamic_conf.yml
+
+- name: Copy Docker Compose file
+  template:
     src: traefik-compose.yml.j2
-    dest: "/home/{{ansible_user}}/stacks_files/traefik-compose.yml"
-  become: true
-- name: Synchronize config file
-  ansible.posix.synchronize:
-    src: "{{ playbook_dir }}/roles/traefik/files/traefik.yml"
-    dest: "/etc/traefik/traefik.yml"
-    mode: push
-    delete: false
-  become: true
-- name: Deploy traefik stack
-  community.docker.docker_stack:
-    state: present
-    name: traefik
-    prune: true
-    compose:
-      - "/home/{{ansible_user}}/stacks_files/traefik-compose.yml"
+    dest: /opt/traefik/docker-compose.yml
+
+- name: Create letsencrypt volume directory
+  file:
+    path: /opt/traefik/letsencrypt
+    state: directory
+    mode: '0755'
+
+- name: Start Traefik container
+  command: docker compose up -d
+  args:
+    chdir: /opt/traefik

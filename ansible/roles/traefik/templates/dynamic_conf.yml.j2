@@ -1,0 +1,15 @@
+http:
+  routers:
+    consul-ui:
+      rule: "Host(`consul.zcorp.ovh`)"
+      service: consul-ui
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    consul-ui:
+      loadBalancer:
+        servers:
+          - url: "host.docker.internal:8500"

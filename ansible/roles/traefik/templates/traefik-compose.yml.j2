@@ -2,44 +2,25 @@ version: '3.8'
 services:
   traefik:
     image: traefik:v2.11
-    container_name: "traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.file.filename=/etc/traefik/dynamic_conf.yml"
+      - "--providers.file.watch=true"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesResolvers.letsencrypt.acme.email={{ acme_email }}"
+      - "--certificatesResolvers.letsencrypt.acme.storage=acme.json"
+      - "--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web"
+      - "--providers.consulcatalog.endpoint.address=host.docker.internal:8500"
+      - "--providers.consulcatalog.endpoint.scheme=http"
     ports:
-        - "80:80"
-        - "443:443"
+      - "80:80"
+      - "443:443"
     volumes:
-        - /var/run/docker.sock:/var/run/docker.sock:ro
-        - /etc/traefik/traefik.yml:/etc/traefik/traefik.yaml
-        - certificates:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - ./dynamic_conf.yml:/etc/traefik/dynamic_conf.yml
+      - letsencrypt:/letsencrypt
     restart: always
-    networks:
-        - z_public    
-    deploy:
-        restart_policy:
-            condition: any
-        placement:
-            constraints:
-                - node.role == manager
-        labels:
-            - traefik.enable=true
-            - traefik.docker.network=z_public
-            - traefik.http.routers.http-catchall.rule=PathPrefix(`/`)
-            - traefik.http.routers.http-catchall.entrypoints=web
-            - traefik.http.routers.http-catchall.middlewares=redirect-to-https
-            - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
-            #Auth
-            - traefik.http.middlewares.auth.basicauth.users=admin:$$2y$$05$$LVH5/nqo4PGupl36GEKHjuxLeWKQ2XdYmoe8sQ.xU/L1hRcRJOM5K
-            # Traefik dashboard
-            - traefik.http.routers.traefik.rule=Host(`traefik.zcorp.ovh`)
-            - traefik.http.routers.traefik.entrypoints=websecure
-            - traefik.http.routers.traefik.tls.certresolver=letsencrypt
-            - traefik.http.routers.traefik.service=api@internal
-            - traefik.http.middlewares.strip.stripprefix.prefixes=/traefik
-            - traefik.http.services.api@internal.loadbalancer.server.port=8080
-            - traefik.http.routers.traefik.middlewares=secured
-            - traefik.http.middlewares.secured.chain.middlewares=redirect-to-https,auth,strip
 volumes:
-    certificates:
-networks:
-  z_public:
-    driver: overlay
-    attachable: true
+  letsencrypt:
