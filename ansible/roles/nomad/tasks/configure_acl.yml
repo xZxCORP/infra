@@ -1,0 +1,33 @@
+---
+- name: Check if bootstrap ACL token exists
+  stat:
+    path: /etc/nomad.d/bootstrap_acl.txt
+  register: acl_bootstrap_exists
+
+- name: Set fact indicating if ACL bootstrap is required
+  set_fact:
+    acl_bootstrap_required: "{{ not acl_bootstrap_exists.stat.exists }}"
+- name: Bootstrap Nomad ACL
+  command: nomad acl bootstrap
+  register: bootstrap_acl
+  when: nomad_server and acl_bootstrap_required
+
+- name: Save bootstrap token
+  copy:
+    content: "{{ bootstrap_acl.stdout }}"
+    dest: /etc/nomad.d/bootstrap_acl.txt
+  when: nomad_server and acl_bootstrap_required
+- name: Extract bootstrap token
+  set_fact:
+    bootstrap_token: "{{ bootstrap_acl.stdout | regex_search('SecretID\\s+=\\s+([\\w-]+)', '\\1') }}"
+  when: acl_bootstrap_required
+
+- name: Create bootstrap policy
+  ansible.builtin.template:
+    src: bootstrap_policy.hcl.j2
+    dest: /etc/nomad.d/bootstrap_policy.hcl
+  when: nomad_server and acl_bootstrap_required
+
+- name: Apply bootstrap policy
+  command: nomad acl policy apply -token={{ bootstrap_token }} bootstrap /etc/nomad.d/bootstrap_policy.hcl
+  when: nomad_server and acl_bootstrap_required

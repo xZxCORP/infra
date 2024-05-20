@@ -1,6 +1,8 @@
 - name: Configure masters nodes
   hosts: masters
   become: true
+  vars_files:
+    - secrets.yml
   roles:
     - role: docker
       tags: docker
@@ -9,8 +11,11 @@
     - role: consul
       tags: consul
       consul_server: true
-    - role: traefik
-      tags: traefik
+    - role: nomad
+      tags: nomad
+      nomad_server: true
+    # - role: traefik
+    #   tags: traefik
 
     # - role: nomad
     #   nomad_server: true
@@ -18,11 +23,18 @@
 - name: Configure workers nodes
   hosts: workers
   become: true
+  vars_files:
+    - secrets.yml
   roles:
     - role: docker
       tags: docker
+    - role: hashicorp_repo
+      tags: repo
     - role: consul
       tags: consul
       consul_server: false
+    - role: nomad
+      tags: nomad
+      nomad_server: false
     # - role: nomad
     #   nomad_server: false
