@@ -1,3 +1,0 @@
----
-# vars file for roles/nomad
-nomad_server: false

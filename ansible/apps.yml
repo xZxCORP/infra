@@ -1,6 +1,0 @@
-- name: Configure apps
-  hosts: masters
-  vars_files:
-    - secrets.yml
-  roles:
-    - techfreedom

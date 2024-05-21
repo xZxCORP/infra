@@ -1,3 +1,0 @@
----
-# vars file for roles/traefik
-acme_email: "zcorp0902@gmail.com"
