@@ -1,10 +1,6 @@
 #!/bin/bash
 
-MASTER_IP="158.178.207.146"
-WORKER_IPS=("89.168.61.151" "141.145.221.222")
-USER="ubuntu"
-K3S_VERSION="v1.30.0+k3s1"
-SSH_KEY="~/.ssh/gpe-vm"
+source common.sh
 
 if ! command -v k3sup &> /dev/null; then
     echo "k3sup could not be found, installing..."
