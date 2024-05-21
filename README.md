@@ -44,14 +44,18 @@ After collecting all the information, fill out the `terraform.tfvars` following 
 - `terraform init`
 - `terraform apply`
 
-### Ansible
+### K3S
+#### Install
+- configure master ip and worker ip
+```
+./install.sh
+```
 
-- set the inventory with the created notes(if not changed)
-- set the password.txt file with the ansible vault secret(on the trello)
-- setup the cluster
-  - `ansible-playbook cluster.yml`
-- setup the tooling
-  - `ansible-playbook tooling.yml --vault-password-file ./password.txt`
+#### Context
+```
+source use.sh
+```
+
 
 ## Contributing
 
