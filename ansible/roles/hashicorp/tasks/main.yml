@@ -7,7 +7,7 @@
     mode: '0644'
     force: true    
 
-- name: Add Hashicorp Nomad repository
+- name: Add Hashicorp repository
   ansible.builtin.apt_repository:
     repo: "deb [signed-by=/etc/apt/keyrings/hashicorp-archive-keyring.asc arch=arm64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
     state: present
