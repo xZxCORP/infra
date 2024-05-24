@@ -1,0 +1,19 @@
+ports:
+  web:
+    expose: true
+    exposedPort: 80
+  websecure:
+    expose: true
+    exposedPort: 443
+
+additionalArguments:
+- "--certificatesresolvers.leresolver.acme.httpchallenge=true"
+- "--certificatesresolvers.leresolver.acme.httpchallenge.entrypoint=web"
+- "--certificatesresolvers.leresolver.acme.email=zcorp0902@gmail.com"
+- "--certificatesresolvers.leresolver.acme.storage=/data/acme.json"
+
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
