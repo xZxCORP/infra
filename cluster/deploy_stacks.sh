@@ -20,17 +20,15 @@ function create_network() {
 
 create_network
 
+ssh_exec $MASTER_IP "rm -rf ~/stacks"
 echo "Copie des fichiers de stack sur le nœud maître..."
 rsync_files $MASTER_IP "./stacks/" "~/stacks/"
+rsync_files $MASTER_IP ".env" "~/.env"
 
 
 echo "Déploiement des stacks sur le nœud maître..."
 ssh_exec $MASTER_IP "docker stack deploy -c ~/stacks/traefik/traefik-stack.yml traefik"
+ssh_exec $MASTER_IP 'export $(xargs < ~/.env) && docker stack deploy -c ~/stacks/mysql/mysql-stack.yml mysql'
 
 echo "Stacks déployées:"
 ssh_exec $MASTER_IP "docker stack ls"
-
-echo "Services Traefik:"
-ssh_exec $MASTER_IP "docker stack services traefik"
-
-get_service_logs "traefik_traefik"
