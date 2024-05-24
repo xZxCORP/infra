@@ -1,24 +1,24 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nginx-ingress
-  namespace: default
+  name: argocd-ingress
+  namespace: argocd
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
 spec:
   rules:
-  - host: nginx.zcorp.ovh
+  - host: argocd.zcorp.ovh
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: nginx-service
+            name: argocd-server
             port:
               number: 80
   tls:
   - hosts:
-    - nginx.zcorp.ovh
-    secretName: nginx-tls
+    - argocd.zcorp.ovh
+    secretName: argocd-tls
