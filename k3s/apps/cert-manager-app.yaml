@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/your-repo-url'
+    repoURL: 'git@github.com:xZxCORP/infra.git'
     targetRevision: HEAD
     path: k3s/apps/cert-manager
   destination:
