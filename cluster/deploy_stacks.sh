@@ -25,7 +25,7 @@ rsync_files $MASTER_IP "./stacks/" "~/stacks/"
 
 
 echo "Déploiement des stacks sur le nœud maître..."
-ssh_exec $MASTER_IP "docker stack deploy -c ~/stacks/traefik-stack.yml traefik"
+ssh_exec $MASTER_IP "docker stack deploy -c ~/stacks/traefik/traefik-stack.yml traefik"
 
 echo "Stacks déployées:"
 ssh_exec $MASTER_IP "docker stack ls"
