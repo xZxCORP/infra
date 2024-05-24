@@ -5,5 +5,5 @@ type: application
 version: 0.1.0
 dependencies:
 - name: cert-manager
-  version: ">=1.14.5" # Utilisez une version compatible ou laissez vide pour toujours tirer la dernière
+  version: "1.14.5" # Utilisez une version compatible ou laissez vide pour toujours tirer la dernière
   repository: "https://charts.jetstack.io"
