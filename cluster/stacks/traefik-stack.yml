@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  traefik:
+    image: traefik:v2.11
+    container_name: "traefik"
+
+    ports:
+    - "80:80"
+    - "443:443"
+    deploy:
+      placement:
+        constraints:
+        - node.role == manager
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.http.routers.http-catchall.rule=PathPrefix(`/`)
+      - traefik.http.routers.http-catchall.entrypoints=web
+      - traefik.http.routers.http-catchall.middlewares=redirect-to-https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+      #Auth
+      - traefik.http.middlewares.auth.basicauth.users=admin:$$2y$$05$$LVH5/nqo4PGupl36GEKHjuxLeWKQ2XdYmoe8sQ.xU/L1hRcRJOM5K
+      # Traefik dashboard
+      - traefik.http.routers.traefik.rule=Host(`traefik.zcorp.ovh`)
+      - traefik.http.routers.traefik.entrypoints=websecure
+      - traefik.http.routers.traefik.tls.certresolver=letsencrypt
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.middlewares.strip.stripprefix.prefixes=/traefik
+      - traefik.http.services.api@internal.loadbalancer.server.port=8080
+      - traefik.http.routers.traefik.middlewares=secured
+      - traefik.http.middlewares.secured.chain.middlewares=redirect-to-https,auth,strip
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - certificates:/letsencrypt
+    - ./traefik.yml:/etc/traefik/traefik.yaml
+    networks:
+    - traefik-public
+
+volumes:
+  certificates:
+
+networks:
+  traefik-public:
+    external: true

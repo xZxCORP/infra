@@ -1,15 +1,8 @@
 #!/bin/bash
 
 source config.sh
+source core.sh
 
-# Fonction pour exécuter une commande sur un nœud distant via SSH
-function ssh_exec {
-    local IP=$1
-    shift
-    ssh -i $SSH_KEY_PATH $USER@$IP "$@"
-}
-
-# Fonction pour installer Docker
 function install_docker {
     local IP=$1
     echo "Checking if Docker is installed on $IP..."
@@ -20,6 +13,16 @@ function install_docker {
         ssh_exec $IP "curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && sudo usermod -aG docker $USER"
     fi
 }
+create_network() {
+    if docker network ls | grep -q $NETWORK_NAME; then
+        echo "Le réseau $NETWORK_NAME existe déjà."
+    else
+        echo "Le réseau $NETWORK_NAME n'existe pas. Création en cours..."
+        docker network create --driver=overlay --attachable $NETWORK_NAME
+        echo "Réseau $NETWORK_NAME créé avec succès."
+    fi
+}
+
 
 # Installer Docker sur le nœud maître
 install_docker $MASTER_IP
