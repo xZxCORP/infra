@@ -13,16 +13,6 @@ function install_docker {
         ssh_exec $IP "curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && sudo usermod -aG docker $USER"
     fi
 }
-create_network() {
-    if docker network ls | grep -q $NETWORK_NAME; then
-        echo "Le réseau $NETWORK_NAME existe déjà."
-    else
-        echo "Le réseau $NETWORK_NAME n'existe pas. Création en cours..."
-        docker network create --driver=overlay --attachable $NETWORK_NAME
-        echo "Réseau $NETWORK_NAME créé avec succès."
-    fi
-}
-
 
 # Installer Docker sur le nœud maître
 install_docker $MASTER_IP
@@ -32,13 +22,15 @@ for WORKER_IP in "${WORKER_IPS[@]}"; do
     install_docker $WORKER_IP
 done
 
+PRIVATE_MASTER_IP=$(ssh_exec $MASTER_IP "ip addr show enp0s6 | grep 'inet ' | awk '{print \$2}' | cut -d/ -f1")
+
 # Initialiser le nœud maître
 echo "Checking if the master node is initialized..."
 if ssh_exec $MASTER_IP "docker info | grep 'Swarm: active'" &>/dev/null; then
     echo "Master node is already initialized."
 else
     echo "Initializing the master node..."
-    ssh_exec $MASTER_IP "docker swarm init --advertise-addr $MASTER_IP"
+    ssh_exec $MASTER_IP "docker swarm init --advertise-addr $PRIVATE_MASTER_IP"
 fi
 
 # Récupérer le token d'inscription pour les nœuds travailleurs
@@ -51,7 +43,7 @@ for WORKER_IP in "${WORKER_IPS[@]}"; do
         echo "Worker node $WORKER_IP is already part of the swarm."
     else
         echo "Adding worker node $WORKER_IP to the swarm..."
-        ssh_exec $WORKER_IP "docker swarm join --token $WORKER_JOIN_TOKEN $MASTER_IP:2377"
+        ssh_exec $WORKER_IP "docker swarm join --token $WORKER_JOIN_TOKEN $PRIVATE_MASTER_IP:2377"
     fi
 done
 

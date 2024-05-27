@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mysql:
@@ -6,22 +6,29 @@ services:
     deploy:
       replicas: 1
       update_config:
+        order: stop-first
+        failure_action: rollback
+      rollback_config:
         parallelism: 1
-        delay: 10s
+        order: stop-first
       restart_policy:
-        condition: on-failure
+        condition: any
+        delay: 10s
+        max_attempts: 3
+        window: 60s
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_HOST: "%"
     volumes:
-    - mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     networks:
-    - traefik-public
+      - proxy
 
 networks:
-  traefik-public:
+  proxy:
     external: true
 
 volumes:
