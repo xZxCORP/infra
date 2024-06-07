@@ -3,16 +3,7 @@
 source config.sh
 source core.sh
 
-function install_docker {
-    local IP=$1
-    echo "Checking if Docker is installed on $IP..."
-    if ssh_exec $IP "docker --version" &>/dev/null; then
-        echo "Docker is already installed on $IP."
-    else
-        echo "Installing Docker on $IP..."
-        ssh_exec $IP "curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && sudo usermod -aG docker $USER"
-    fi
-}
+
 
 # Installer Docker sur le nœud maître
 install_docker $MASTER_IP

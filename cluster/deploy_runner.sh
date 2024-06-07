@@ -23,6 +23,7 @@ sudo ./svc.sh install
 sudo ./svc.sh start
 EOF
 )
+install_docker $RUNNER_IP
 
 ssh_exec $RUNNER_IP "echo '$CONFIGURE_RUNNER_SCRIPT' > configure_runner.sh"
 echo "Script de configuration copié sur le serveur distant."
