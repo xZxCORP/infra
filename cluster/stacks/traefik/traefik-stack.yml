@@ -5,6 +5,7 @@ services:
     image: traefik:v2.11
     ports:
       - "80:80"
+      - "5672:5672"
       - "443:443"
     networks:
       - proxy
@@ -23,6 +24,7 @@ services:
       - --entryPoints.web.http.redirections.entrypoint.scheme=https
       - --entrypoints.websecure.address=:443
       - --entrypoints.websecure.http.tls.certresolver=myresolver
+      - --entrypoints.amqp.address=:5672
       - --certificatesresolvers.myresolver.acme.email=zcorp0902@gmail.com
       - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.myresolver.acme.tlschallenge=true
@@ -38,22 +40,7 @@ services:
         - traefik.http.routers.mydashboard.middlewares=myauth
         - traefik.http.services.mydashboard.loadbalancer.server.port=1337
         - traefik.http.middlewares.myauth.basicauth.users=admin:$$2y$$05$$LVH5/nqo4PGupl36GEKHjuxLeWKQ2XdYmoe8sQ.xU/L1hRcRJOM5K
-  whoami:
-    image: traefik/whoami:v1.10
-    hostname: "{{.Node.Hostname}}"
-    networks:
-      - proxy
-    deploy:
-      mode: replicated
-      replicas: 2
-      # placement:
-      #   constraints:
-      #     - node.role==manager
-      labels:
-        - traefik.enable=true
-        - traefik.http.routers.whoami.rule=Host(`whoami.zcorp.ovh`)
-        - traefik.http.routers.whoami.entrypoints=websecure
-        - traefik.http.services.whoami.loadbalancer.server.port=80
+
 volumes:
   certificates:
 

@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    networks:
+      - proxy
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.rabbitmq-ui.rule=Host(`rabbitmq.zcorp.ovh`)
+        - traefik.http.routers.rabbitmq-ui.entrypoints=websecure
+        - traefik.http.routers.rabbitmq-ui.tls.certresolver=myresolver
+        - traefik.http.services.rabbitmq-ui.loadbalancer.server.port=15672
+        - traefik.tcp.routers.rabbitmq-amqp.rule=Host(`rabbitmq.zcorp.ovh`)
+        - traefik.tcp.routers.rabbitmq-amqp.entrypoints=amqp
+        - traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  rabbitmq_data:

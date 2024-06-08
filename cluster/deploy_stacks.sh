@@ -21,6 +21,7 @@ function create_network() {
 # create_network
 
 ssh_exec $MASTER_IP "rm -rf ~/stacks"
+ssh_exec $MASTER_IP "rm -rf ~/.env"
 echo "Copie des fichiers de stack sur le nœud maître..."
 rsync_files $MASTER_IP "./stacks/" "~/stacks/"
 rsync_files $MASTER_IP ".env" "~/.env"
@@ -29,7 +30,7 @@ rsync_files $MASTER_IP ".env" "~/.env"
 echo "Déploiement des stacks sur le nœud maître..."
 ssh_exec $MASTER_IP "docker stack deploy -c ~/stacks/traefik/traefik-stack.yml traefik"
 ssh_exec $MASTER_IP 'export $(xargs < ~/.env) && docker stack deploy -c ~/stacks/mysql/mysql-stack.yml mysql'
-ssh_exec $MASTER_IP 'export $(xargs < ~/.env) && docker stack deploy -c ~/stacks/techfreedom/techfreedom-stack.yml techfreedom'
+ssh_exec $MASTER_IP 'export $(xargs < ~/.env) && docker stack deploy -c ~/stacks/rabbitmq/rabbitmq-stack.yml rabbitmq'
 
 echo "Stacks déployées:"
 ssh_exec $MASTER_IP "docker stack ls"
