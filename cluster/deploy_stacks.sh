@@ -31,6 +31,7 @@ echo "Déploiement des stacks sur le nœud maître..."
 ssh_exec $MASTER_IP "docker stack deploy -c ~/stacks/traefik/traefik-stack.yml traefik"
 ssh_exec $MASTER_IP 'export $(xargs < ~/.env) && docker stack deploy -c ~/stacks/mysql/mysql-stack.yml mysql'
 ssh_exec $MASTER_IP 'export $(xargs < ~/.env) && docker stack deploy -c ~/stacks/rabbitmq/rabbitmq-stack.yml rabbitmq'
+ssh_exec $MASTER_IP 'export $(xargs < ~/.env) && docker stack deploy -c ~/stacks/wheelz/wheelz-stack.yml wheelz'
 
 echo "Stacks déployées:"
 ssh_exec $MASTER_IP "docker stack ls"

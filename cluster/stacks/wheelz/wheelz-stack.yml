@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+  auth:
+    image: zcorp0902746/wheelz-auth-service:latest
+    deploy:
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wheelz-auth-service.rule=Host(`wheelz-auth.zcorp.ovh`)
+        - traefik.http.routers.wheelz-auth-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-auth-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-auth-service.loadbalancer.server.port=3000
+    environment:
+      HOST: "0.0.0.0"
+    networks:
+      - proxy
+  user:
+    image: zcorp0902746/wheelz-user-service:latest
+    deploy:
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wheelz-user-service.rule=Host(`wheelz-user.zcorp.ovh`)
+        - traefik.http.routers.wheelz-user-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-user-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-user-service.loadbalancer.server.port=3000
+    environment:
+      HOST: "0.0.0.0"
+    networks:
+      - proxy
+  # frontend:
+  #   image: zcorp0902746/techfreedom-frontend:latest
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 3
+  #     restart_policy:
+  #       condition: on-failure
+
+  #     labels:
+  #       - traefik.enable=true
+  #       - traefik.http.routers.techfreedom-frontend.rule=Host(`techfreedom-frontend.zcorp.ovh`)
+  #       - traefik.http.routers.techfreedom-frontend.entrypoints=websecure
+  #       - traefik.http.routers.techfreedom-frontend.tls.certresolver=myresolver
+  #       - traefik.http.services.techfreedom-frontend.loadbalancer.server.port=80
+
+  #   networks:
+  #     - proxy
+
+networks:
+  proxy:
+    external: true
