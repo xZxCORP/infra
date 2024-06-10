@@ -35,23 +35,23 @@ services:
       HOST: "0.0.0.0"
     networks:
       - proxy
-  # frontend:
-  #   image: zcorp0902746/techfreedom-frontend:latest
-  #   deploy:
-  #     mode: replicated
-  #     replicas: 3
-  #     restart_policy:
-  #       condition: on-failure
+  front:
+    image: zcorp0902746/wheelz-front-service:latest
+    deploy:
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        condition: on-failure
 
-  #     labels:
-  #       - traefik.enable=true
-  #       - traefik.http.routers.techfreedom-frontend.rule=Host(`techfreedom-frontend.zcorp.ovh`)
-  #       - traefik.http.routers.techfreedom-frontend.entrypoints=websecure
-  #       - traefik.http.routers.techfreedom-frontend.tls.certresolver=myresolver
-  #       - traefik.http.services.techfreedom-frontend.loadbalancer.server.port=80
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wheelz-front-service.rule=Host(`wheelz-front.zcorp.ovh`)
+        - traefik.http.routers.wheelz-front-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-front-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-front-service.loadbalancer.server.port=80
 
-  #   networks:
-  #     - proxy
+    networks:
+      - proxy
 
 networks:
   proxy:
