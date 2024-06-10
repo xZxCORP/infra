@@ -16,13 +16,15 @@ services:
         condition: on-failure
       labels:
         - traefik.enable=true
-        - traefik.http.routers.rabbitmq-ui.rule=Host(`rabbitmq.zcorp.ovh`)
+        - traefik.http.routers.rabbitmq-ui.rule=Host(`rabbitmq-ui.zcorp.ovh`)
         - traefik.http.routers.rabbitmq-ui.entrypoints=websecure
         - traefik.http.routers.rabbitmq-ui.tls.certresolver=myresolver
         - traefik.http.services.rabbitmq-ui.loadbalancer.server.port=15672
-        - traefik.tcp.routers.rabbitmq-amqp.rule=Host(`rabbitmq.zcorp.ovh`)
-        - traefik.tcp.routers.rabbitmq-amqp.entrypoints=amqp
-        - traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672
+        - traefik.tcp.routers.rabbitmq-amqps.rule=HostSNI(`rabbitmq-server.zcorp.ovh`)
+        - traefik.tcp.routers.rabbitmq-amqps.entrypoints=amqps
+        - traefik.tcp.routers.rabbitmq-amqps.tls.certresolver=myresolver
+        - traefik.tcp.routers.rabbitmq-ampqs.service=service-rabbitmq-ampqs
+        - traefik.tcp.services.service-rabbitmq-ampqs.loadbalancer.server.port=5672
 
 networks:
   proxy:
