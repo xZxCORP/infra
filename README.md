@@ -12,7 +12,6 @@
 - [Terraform cli](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 - [OCI cli](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm)
   - Configured with `oci config setup`
-- [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
 ## Usage
 
@@ -44,18 +43,16 @@ After collecting all the information, fill out the `terraform.tfvars` following 
 - `terraform init`
 - `terraform apply`
 
-### K3S
-#### Install
-- configure master ip and worker ip
-```
-./install.sh
-```
+### Cluster
 
-#### Context
-```
-source use.sh
-```
+#### Env
+Configure `.env` file before running the scripts
 
+#### Order of scripts to run
+- deploy_iptables
+- deploy_cluster
+- deploy_runner
+- deploy_stacks
 
 ## Contributing
 
