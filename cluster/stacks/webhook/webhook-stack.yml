@@ -3,6 +3,8 @@ version: "3.8"
 services:
   webhook:
     image: zcorp0902746/webhook-service:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     deploy:
       mode: replicated
       placement:
@@ -20,6 +22,7 @@ services:
     environment:
       HOST: "0.0.0.0"
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+      DOCKER_HOST: unix:///var/run/docker.sock
     networks:
       - proxy
 networks:
