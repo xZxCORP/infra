@@ -13,12 +13,12 @@ function create_network() {
         echo "Le réseau $NETWORK_NAME existe déjà."
     else
         echo "Le réseau $NETWORK_NAME n'existe pas. Création en cours..."
-        ssh_exec $MASTER_IP "docker network create --driver=overlay --attachable --subnet $NETWORK_NAME"
+        ssh_exec $MASTER_IP "docker network create --driver=overlay --attachable $NETWORK_NAME"
         echo "Réseau $NETWORK_NAME créé avec succès."
     fi
 }
 
-# create_network
+create_network
 
 ssh_exec $MASTER_IP "rm -rf ~/stacks"
 ssh_exec $MASTER_IP "rm -rf ~/.env"

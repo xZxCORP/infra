@@ -13,10 +13,10 @@ services:
         condition: on-failure
       labels:
         - traefik.enable=true
-        - traefik.http.routers.wheelz-auth-service.rule=Host(`webhook.zcorp.ovh`)
-        - traefik.http.routers.wheelz-auth-service.entrypoints=websecure
-        - traefik.http.routers.wheelz-auth-service.tls.certresolver=myresolver
-        - traefik.http.services.wheelz-auth-service.loadbalancer.server.port=3000
+        - traefik.http.routers.webhook-service.rule=Host(`webhook.zcorp.ovh`)
+        - traefik.http.routers.webhook-service.entrypoints=websecure
+        - traefik.http.routers.webhook-service.tls.certresolver=myresolver
+        - traefik.http.services.webhook-service.loadbalancer.server.port=3000
     environment:
       HOST: "0.0.0.0"
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
