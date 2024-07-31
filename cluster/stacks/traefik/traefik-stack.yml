@@ -7,6 +7,7 @@ services:
       - "80:80"
       - "5672:5672"
       - "5671:5671"
+      - "3306:3306"
       - "443:443"
     networks:
       - proxy
@@ -27,6 +28,7 @@ services:
       - --entrypoints.websecure.http.tls.certresolver=myresolver
       - --entrypoints.amqp.address=:5672
       - --entrypoints.amqps.address=:5671
+      - --entrypoints.mysql.address=:3306
       - --certificatesresolvers.myresolver.acme.email=zcorp0902@gmail.com
       - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.myresolver.acme.tlschallenge=true

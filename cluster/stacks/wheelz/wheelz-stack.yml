@@ -52,7 +52,58 @@ services:
 
     networks:
       - proxy
+  blockchain:
+    image: zcorp0902746/wheelz-blockchain-service:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wheelz-blockchain-service.rule=Host(`wheelz-blockchain.zcorp.ovh`)
+        - traefik.http.routers.wheelz-blockchain-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-blockchain-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-blockchain-service.loadbalancer.server.port=3000
+    environment:
+      HOST: "0.0.0.0"
+    networks:
+      - proxy
+  transaction:
+    image: zcorp0902746/wheelz-transaction-service:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wheelz-transaction-service.rule=Host(`wheelz-transaction.zcorp.ovh`)
+        - traefik.http.routers.wheelz-transaction-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-transaction-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-transaction-service.loadbalancer.server.port=3000
+    environment:
+      HOST: "0.0.0.0"
+    networks:
+      - proxy
+  notification:
+    image: zcorp0902746/wheelz-notification-service:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      # labels:
+      #   - traefik.enable=true
+      #   - traefik.http.routers.wheelz-blockchain-service.rule=Host(`wheelz-blockchain.zcorp.ovh`)
+      #   - traefik.http.routers.wheelz-blockchain-service.entrypoints=websecure
+      #   - traefik.http.routers.wheelz-blockchain-service.tls.certresolver=myresolver
+      #   - traefik.http.services.wheelz-blockchain-service.loadbalancer.server.port=3000
+    # environment:
+    #   HOST: "0.0.0.0"
+    networks:
+      - proxy
 networks:
   proxy:
     external: true
