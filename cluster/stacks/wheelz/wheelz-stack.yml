@@ -33,6 +33,12 @@ services:
         - traefik.http.services.wheelz-user-service.loadbalancer.server.port=3000
     environment:
       HOST: "0.0.0.0"
+      PORT: 3000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: user_service_db
     networks:
       - proxy
   front:
@@ -73,10 +79,6 @@ services:
   transaction:
     image: zcorp0902746/wheelz-transaction-service:latest
     deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        condition: on-failure
       labels:
         - traefik.enable=true
         - traefik.http.routers.wheelz-transaction-service.rule=Host(`wheelz-transaction.zcorp.ovh`)
@@ -84,7 +86,15 @@ services:
         - traefik.http.routers.wheelz-transaction-service.tls.certresolver=myresolver
         - traefik.http.services.wheelz-transaction-service.loadbalancer.server.port=3000
     environment:
-      HOST: "0.0.0.0"
+      NODE_ENV: production
+      NOTIFICATION_QUEUE_URL: amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      NOTIFICATION_QUEUE_NAME: transactions
+      API_HOST: 0.0.0.0
+      API_PORT: 3000
+      DATA_SIGNER_ALGORITHM: ${SIGNATURE_ALGORITHM}
+      DATA_SIGNER_PRIVATE: ${SIGNATURE_PRIVATE}
+      CONTRACT_PATH: ${TRANSACTION_SERVICE_CONTRACT_PATH}
+      LOG_LEVEL: info
     networks:
       - proxy
   notification:
@@ -110,7 +120,7 @@ services:
         condition: on-failure
       labels:
         - traefik.enable=true
-        - traefik.http.routers.wheelz-showcase-service.rule=Host(`zcorp.ovh`)
+        - traefik.http.routers.wheelz-showcase-service.rule=Host(`wheelz-showcase.zcorp.ovh`)
         - traefik.http.routers.wheelz-showcase-service.entrypoints=websecure
         - traefik.http.routers.wheelz-showcase-service.tls.certresolver=myresolver
         - traefik.http.services.wheelz-showcase-service.loadbalancer.server.port=80
