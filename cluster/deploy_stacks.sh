@@ -25,11 +25,19 @@ ssh_exec $MASTER_IP "rm -rf ~/.env"
 echo "Copie des fichiers de stack sur le nœud maître..."
 rsync_files $MASTER_IP "./stacks/" "~/stacks/"
 rsync_files $MASTER_IP ".env" "~/.env"
+
+echo "Copie des fichiers de config"
+
 rsync_files $MASTER_IP "./configs/" "~/configs/"
+for WORKER_IP in "${WORKER_IPS[@]}"; do
+    rsync_files $WORKER_IP "./configs/" "~/configs/"
+
+done
 
 echo "Déploiement des stacks sur le nœud maître..."
 ssh_exec $MASTER_IP 'set -a; . ~/.env; set +a; docker stack deploy -c ~/stacks/traefik/traefik-stack.yml traefik'
 ssh_exec $MASTER_IP 'set -a; . ~/.env; set +a; docker stack deploy -c ~/stacks/mysql/mysql-stack.yml mysql'
+ssh_exec $MASTER_IP 'set -a; . ~/.env; set +a; docker stack deploy -c ~/stacks/mongodb/mongodb-stack.yml mongodb'
 ssh_exec $MASTER_IP 'set -a; . ~/.env; set +a; docker stack deploy -c ~/stacks/rabbitmq/rabbitmq-stack.yml rabbitmq'
 ssh_exec $MASTER_IP 'set -a; . ~/.env; set +a; docker stack deploy -c ~/stacks/minio/minio-stack.yml minio'
 ssh_exec $MASTER_IP 'set -a; . ~/.env; set +a; docker stack deploy -c ~/stacks/wheelz/wheelz-stack.yml wheelz'

@@ -8,6 +8,7 @@ services:
       - "5672:5672"
       - "5671:5671"
       - "3306:3306"
+      - "27017:27017"
       - "443:443"
     networks:
       - proxy
@@ -29,6 +30,7 @@ services:
       - --entrypoints.amqp.address=:5672
       - --entrypoints.amqps.address=:5671
       - --entrypoints.mysql.address=:3306
+      - --entrypoints.mongodb.address=:27017
       - --certificatesresolvers.myresolver.acme.email=zcorp0902@gmail.com
       - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.myresolver.acme.tlschallenge=true
