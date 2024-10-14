@@ -14,7 +14,7 @@ function rsync_files {
     local IP=$1
     local SRC=$2
     local DEST=$3
-    rsync -r --delete --ignore-existing -e "ssh -i $SSH_KEY_PATH" $SRC $USER@$IP:$DEST
+    rsync -r --ignore-times -e "ssh -i $SSH_KEY_PATH" $SRC $USER@$IP:$DEST
 }
 
 function create_directory {

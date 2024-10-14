@@ -1,0 +1,10 @@
+endpoints:
+  - name: Check MySQL
+    group: MySQL
+    url: "tcp://zcorp.ovh:3306"
+    interval: 1m
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - type: discord
+        description: "MySQL is down"
