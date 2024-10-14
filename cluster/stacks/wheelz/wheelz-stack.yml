@@ -58,8 +58,8 @@ services:
 
     networks:
       - proxy
-  blockchain:
-    image: zcorp0902746/wheelz-blockchain-service:latest
+  chain:
+    image: zcorp0902746/wheelz-chain-service:latest
     deploy:
       mode: replicated
       replicas: 1
@@ -68,10 +68,10 @@ services:
 
       labels:
         - traefik.enable=true
-        - traefik.http.routers.wheelz-blockchain-service.rule=Host(`wheelz-blockchain.zcorp.ovh`)
-        - traefik.http.routers.wheelz-blockchain-service.entrypoints=websecure
-        - traefik.http.routers.wheelz-blockchain-service.tls.certresolver=myresolver
-        - traefik.http.services.wheelz-blockchain-service.loadbalancer.server.port=3000
+        - traefik.http.routers.wheelz-chain-service.rule=Host(`wheelz-chain.zcorp.ovh`)
+        - traefik.http.routers.wheelz-chain-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-chain-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-chain-service.loadbalancer.server.port=3000
     environment:
       HOST: "0.0.0.0"
     networks:
