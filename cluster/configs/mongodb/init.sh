@@ -7,6 +7,9 @@ db.createUser({
   roles: [{
     role: 'readWrite',
     db: '$MONGODB_DATABASE'
+  },{
+    role: 'readWrite',
+    db: 'admin'
   }]
 })
 use $MONGODB_DATABASE

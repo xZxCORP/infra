@@ -4,8 +4,8 @@ services:
   auth:
     image: zcorp0902746/wheelz-auth-service:latest
     deploy:
-      mode: replicated
-      replicas: 3
+      placement:
+        constraints: [node.labels.apps == true ]
       restart_policy:
         condition: on-failure
       labels:
@@ -15,14 +15,21 @@ services:
         - traefik.http.routers.wheelz-auth-service.tls.certresolver=myresolver
         - traefik.http.services.wheelz-auth-service.loadbalancer.server.port=3000
     environment:
-      HOST: "0.0.0.0"
+      PORT: 3000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: auth_service_db
+      USER_SERVICE_URL: http://user:3000
+      JWT_SECRET: ${JWT_SECRET}
     networks:
       - proxy
   user:
     image: zcorp0902746/wheelz-user-service:latest
     deploy:
-      mode: replicated
-      replicas: 3
+      placement:
+        constraints: [node.labels.apps == true ]
       restart_policy:
         condition: on-failure
       labels:
@@ -32,23 +39,22 @@ services:
         - traefik.http.routers.wheelz-user-service.tls.certresolver=myresolver
         - traefik.http.services.wheelz-user-service.loadbalancer.server.port=3000
     environment:
-      HOST: "0.0.0.0"
       PORT: 3000
       DB_HOST: mysql
       DB_PORT: 3306
       DB_USERNAME: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_NAME: user_service_db
+      AUTH_SERVICE_URL: http://auth:3000
     networks:
       - proxy
   front:
     image: zcorp0902746/wheelz-front-service:latest
     deploy:
-      mode: replicated
-      replicas: 3
+      placement:
+        constraints: [node.labels.apps == true ]
       restart_policy:
         condition: on-failure
-
       labels:
         - traefik.enable=true
         - traefik.http.routers.wheelz-front-service.rule=Host(`wheelz-front.zcorp.ovh`)
@@ -58,20 +64,20 @@ services:
 
     networks:
       - proxy
-  blockchain:
-    image: zcorp0902746/wheelz-blockchain-service:latest
+  chain:
+    image: zcorp0902746/wheelz-chain-service:latest
     deploy:
-      mode: replicated
-      replicas: 1
+      placement:
+        constraints: [node.labels.apps == true ]
       restart_policy:
         condition: on-failure
 
       labels:
         - traefik.enable=true
-        - traefik.http.routers.wheelz-blockchain-service.rule=Host(`wheelz-blockchain.zcorp.ovh`)
-        - traefik.http.routers.wheelz-blockchain-service.entrypoints=websecure
-        - traefik.http.routers.wheelz-blockchain-service.tls.certresolver=myresolver
-        - traefik.http.services.wheelz-blockchain-service.loadbalancer.server.port=3000
+        - traefik.http.routers.wheelz-chain-service.rule=Host(`wheelz-chain.zcorp.ovh`)
+        - traefik.http.routers.wheelz-chain-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-chain-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-chain-service.loadbalancer.server.port=3000
     environment:
       HOST: "0.0.0.0"
     networks:
@@ -79,6 +85,10 @@ services:
   transaction:
     image: zcorp0902746/wheelz-transaction-service:latest
     deploy:
+      placement:
+        constraints: [node.labels.apps == true ]
+      restart_policy:
+        condition: on-failure
       labels:
         - traefik.enable=true
         - traefik.http.routers.wheelz-transaction-service.rule=Host(`wheelz-transaction.zcorp.ovh`)
@@ -88,18 +98,24 @@ services:
     environment:
       NODE_ENV: production
       NOTIFICATION_QUEUE_URL: amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
-      NOTIFICATION_QUEUE_NAME: transactions
+      NOTIFICATION_QUEUE_NEW_NAME: transactions_new
+      NOTIFICATION_QUEUE_COMPLETED_NAME: transactions_completed
+      TRANSACTION_REPOSITORY_URL: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongo:27017/?tls=false
+      TRANSACTION_REPOSITORY_DATABASE: ${MONGODB_DATABASE}
+      TRANSACTION_REPOSITORY_COLLECTION: transactions
       API_HOST: 0.0.0.0
       API_PORT: 3000
       DATA_SIGNER_ALGORITHM: ${SIGNATURE_ALGORITHM}
       DATA_SIGNER_PRIVATE: ${SIGNATURE_PRIVATE}
-      CONTRACT_PATH: ${TRANSACTION_SERVICE_CONTRACT_PATH}
+      AUTH_SERVICE_URL: http://auth:3000
       LOG_LEVEL: info
     networks:
       - proxy
   notification:
     image: zcorp0902746/wheelz-notification-service:latest
-
+    deploy:
+      placement:
+        constraints: [node.labels.apps == true ]
     environment:
       NODE_ENV: production
       NOTIFICATION_QUEUE_URL: amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
@@ -114,8 +130,8 @@ services:
   showcase:
     image: zcorp0902746/wheelz-showcase-service:latest
     deploy:
-      # mode: replicated
-      # replicas: 3
+      placement:
+        constraints: [node.labels.apps == true ]
       restart_policy:
         condition: on-failure
       labels:
@@ -131,6 +147,21 @@ services:
       WORDPRESS_DB_USER: ${MYSQL_USER}
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       WORDPRESS_DB_NAME: showcase
+    networks:
+      - proxy
+  goblin:
+    image: zcorp0902746/wheelz-goblin-service:latest
+    deploy:
+      placement:
+        constraints: [node.labels.apps == true ]
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wheelz-auth-service.rule=Host(`wheelz-goblin.zcorp.ovh`)
+        - traefik.http.routers.wheelz-auth-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-auth-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-auth-service.loadbalancer.server.port=80
     networks:
       - proxy
 networks:

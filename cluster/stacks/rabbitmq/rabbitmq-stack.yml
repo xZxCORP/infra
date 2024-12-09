@@ -11,7 +11,8 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     deploy:
-      replicas: 1
+      placement:
+        constraints: [node.labels.infra == true ]
       restart_policy:
         condition: on-failure
       labels:

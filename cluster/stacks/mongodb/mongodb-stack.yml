@@ -4,27 +4,16 @@ services:
   mongo:
     image: "mongo:latest"
     deploy:
-      replicas: 1
-      update_config:
-        order: stop-first
-        failure_action: rollback
-      rollback_config:
-        parallelism: 1
-        order: stop-first
-      restart_policy:
-        condition: any
-        delay: 10s
-        max_attempts: 3
-        window: 60s
+      placement:
+        constraints: [node.labels.infra == true ]
       labels:
         - "traefik.enable=true"
         - "traefik.tcp.routers.mongodb.rule=HostSNI(`*`)"
         - "traefik.tcp.routers.mongodb.entrypoints=mongodb"
         - "traefik.tcp.services.mongodb.loadbalancer.server.port=27017"
     environment:
-      - "MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER}"
-      - "MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}"
-      - "MONGO_INITDB_DATABASE=${MONGODB_DATABASE}"
+      - "MONGODB_INITDB_ROOT_USERNAME=root"
+      - "MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}"
       - "MONGODB_USER=${MONGODB_USER}"
       - "MONGODB_PASSWORD=${MONGODB_PASSWORD}"
       - "MONGODB_DATABASE=${MONGODB_DATABASE}"
