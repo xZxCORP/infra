@@ -71,7 +71,6 @@ services:
         constraints: [node.labels.apps == true ]
       restart_policy:
         condition: on-failure
-
       labels:
         - traefik.enable=true
         - traefik.http.routers.wheelz-chain-service.rule=Host(`wheelz-chain.zcorp.ovh`)
@@ -80,6 +79,20 @@ services:
         - traefik.http.services.wheelz-chain-service.loadbalancer.server.port=3000
     environment:
       HOST: "0.0.0.0"
+      TRANSACTION_QUEUE_URL: amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      TRANSACTION_QUEUE_NEW_NAME: transactions_new
+      TRANSACTION_QUEUE_COMPLETED_NAME: transactions_completed
+      DATA_SIGNER_ALGORITHM: ${SIGNATURE_ALGORITHM}
+      DATA_SIGNER_PUBLIC: ${SIGNATURE_PUBLIC}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      CHAIN_STATE_DB_NAME: chain_state
+      CHAIN_STATE_DB_USERNAME: ${MYSQL_USER}
+      CHAIN_STATE_DB_PASSWORD: ${MYSQL_PASSWORD}
+      CHAIN_STATE_DB_HOST: mysql
+      CHAIN_STATE_DB_PORT: 3306
+      TRANSACTION_SERVICE_URL: http://transaction:3000
+      AUTH_SERVICE_URL: http://auth:3000
     networks:
       - proxy
   transaction:
@@ -97,9 +110,9 @@ services:
         - traefik.http.services.wheelz-transaction-service.loadbalancer.server.port=3000
     environment:
       NODE_ENV: production
-      NOTIFICATION_QUEUE_URL: amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
-      NOTIFICATION_QUEUE_NEW_NAME: transactions_new
-      NOTIFICATION_QUEUE_COMPLETED_NAME: transactions_completed
+      TRANSACTION_QUEUE_URL: amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      TRANSACTION_QUEUE_NEW_NAME: transactions_new
+      TRANSACTION_QUEUE_COMPLETED_NAME: transactions_completed
       TRANSACTION_REPOSITORY_URL: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongo:27017/?tls=false
       TRANSACTION_REPOSITORY_DATABASE: ${MONGODB_DATABASE}
       TRANSACTION_REPOSITORY_COLLECTION: transactions
