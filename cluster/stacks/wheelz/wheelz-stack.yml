@@ -78,7 +78,8 @@ services:
         - traefik.http.routers.wheelz-chain-service.tls.certresolver=myresolver
         - traefik.http.services.wheelz-chain-service.loadbalancer.server.port=3000
     environment:
-      HOST: "0.0.0.0"
+      API_HOST: 0.0.0.0
+      API_PORT: 3000
       TRANSACTION_QUEUE_URL: amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
       TRANSACTION_QUEUE_NEW_NAME: transactions_new
       TRANSACTION_QUEUE_COMPLETED_NAME: transactions_completed
@@ -93,6 +94,10 @@ services:
       CHAIN_STATE_DB_PORT: 3306
       TRANSACTION_SERVICE_URL: http://transaction:3000
       AUTH_SERVICE_URL: http://auth:3000
+      CHAIN_URI: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongo:27017
+      CHAIN_DATABASE_NAME: ${MONGODB_DATABASE}
+      CHAIN_COLLECTION_NAME: blocks
+      LOG_LEVEL: info
     networks:
       - proxy
   transaction:
