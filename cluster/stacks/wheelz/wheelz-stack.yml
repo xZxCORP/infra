@@ -126,6 +126,7 @@ services:
       DATA_SIGNER_ALGORITHM: ${SIGNATURE_ALGORITHM}
       DATA_SIGNER_PRIVATE: ${SIGNATURE_PRIVATE}
       AUTH_SERVICE_URL: http://auth:3000
+      VEHICLE_SCRAPER_URL: http://goblin:80
       LOG_LEVEL: info
     networks:
       - proxy
