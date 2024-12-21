@@ -5,9 +5,6 @@ services:
     image: traefik:v2.11
     ports:
       - "80:80"
-      - "5672:5672"
-      - "5671:5671"
-      - "3306:3306"
       - "443:443"
     networks:
       - proxy
@@ -26,10 +23,6 @@ services:
       - --entryPoints.web.http.redirections.entrypoint.scheme=https
       - --entrypoints.websecure.address=:443
       - --entrypoints.websecure.http.tls.certresolver=myresolver
-      - --entrypoints.amqp.address=:5672
-      - --entrypoints.amqps.address=:5671
-      - --entrypoints.mysql.address=:3306
-      - --entrypoints.mongodb.address=:27017
       - --certificatesresolvers.myresolver.acme.email=zcorp0902@gmail.com
       - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.myresolver.acme.tlschallenge=true
