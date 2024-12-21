@@ -6,11 +6,6 @@ services:
     deploy:
       placement:
         constraints: [node.labels.infra == true ]
-      labels:
-        - "traefik.enable=true"
-        - "traefik.tcp.routers.mongodb.rule=HostSNI(`*`)"
-        - "traefik.tcp.routers.mongodb.entrypoints=mongodb"
-        - "traefik.tcp.services.mongodb.loadbalancer.server.port=27017"
     environment:
       - "MONGODB_INITDB_ROOT_USERNAME=root"
       - "MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}"
@@ -20,7 +15,6 @@ services:
     volumes:
       - "mongodb_data:/data/db"
       - ~/configs/mongodb/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
-
     networks:
       - proxy
 
