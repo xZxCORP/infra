@@ -128,7 +128,10 @@ services:
       AUTH_SERVICE_URL: http://auth:3000
       VEHICLE_SCRAPER_URL: http://goblin:80
       TRANSACTION_VALIDATOR_URL: http://kerek:80
+      CHAIN_SERVICE_URL: http://chain:3000
       LOG_LEVEL: info
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     networks:
       - proxy
   notification:
