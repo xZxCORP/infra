@@ -93,6 +93,7 @@ services:
       CHAIN_STATE_DB_HOST: postgres
       CHAIN_STATE_DB_PORT: 5432
       TRANSACTION_SERVICE_URL: http://transaction:3000
+      USER_SERVICE_URL: http://user:3000
       AUTH_SERVICE_URL: http://auth:3000
       CHAIN_URI: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongo:27017
       CHAIN_DATABASE_NAME: ${MONGODB_DATABASE}
@@ -129,6 +130,7 @@ services:
       VEHICLE_SCRAPER_URL: http://goblin:80
       TRANSACTION_VALIDATOR_URL: http://kerek:80
       CHAIN_SERVICE_URL: http://chain:3000
+      USER_SERVICE_URL: http://user:3000
       LOG_LEVEL: info
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
