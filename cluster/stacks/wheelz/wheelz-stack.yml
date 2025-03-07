@@ -225,6 +225,12 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: upload_service_db
       AUTH_SERVICE_URL: http://auth:3000
+      MINIO_USERNAME: ${MINIO_USERNAME}
+      MINIO_PASSWORD: ${MINIO_PASSWORD}
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_BUCKET_NAME: wheelz-upload
+      MINIO_PUBLIC_HOST: https://minio-server.zcorp.ovh
     networks:
       - proxy
 networks:
