@@ -5,3 +5,7 @@ terraform {
     }
   }
 }
+
+data "oci_identity_availability_domains" "z_ads" {
+  compartment_id = var.tenancy_ocid
+}

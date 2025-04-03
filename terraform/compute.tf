@@ -1,4 +1,9 @@
-resource "oci_core_instance" "master" {
+locals {
+  ssh_public_key  = file(var.ssh_public_key_path)
+  ssh_private_key = file(var.ssh_private_key_path)
+}
+
+resource "oci_core_instance" "z_master" {
   availability_domain = var.availability_domain
   compartment_id      = var.compartment_id
   shape               = var.instance_shape
@@ -11,16 +16,16 @@ resource "oci_core_instance" "master" {
     assign_public_ip = true
   }
   metadata = {
-    ssh_authorized_keys = file(var.public_key_path)
+    ssh_authorized_keys = local.ssh_public_key
   }
   source_details {
     source_type = "image"
-    source_id   = var.instance_image_ocid
+    source_id   = var.arm_instance_image_ocid
   }
 
-  display_name = "master"
+  display_name = "z_master"
 }
-resource "oci_core_instance" "runner" {
+resource "oci_core_instance" "z_runner" {
   availability_domain = var.availability_domain
   compartment_id      = var.compartment_id
   shape               = var.instance_shape
@@ -33,17 +38,17 @@ resource "oci_core_instance" "runner" {
     assign_public_ip = true
   }
   metadata = {
-    ssh_authorized_keys = file(var.public_key_path)
+    ssh_authorized_keys = local.ssh_public_key
   }
   source_details {
     source_type = "image"
-    source_id   = var.instance_image_ocid
+    source_id   = var.arm_instance_image_ocid
   }
 
-  display_name = "runner"
+  display_name = "z_runner"
 }
 
-resource "oci_core_instance" "worker" {
+resource "oci_core_instance" "z_worker" {
   count               = 2
   availability_domain = var.availability_domain
   compartment_id      = var.compartment_id
@@ -61,12 +66,12 @@ resource "oci_core_instance" "worker" {
 
   source_details {
     source_type = "image"
-    source_id   = var.instance_image_ocid
+    source_id   = var.arm_instance_image_ocid
 
   }
   metadata = {
-    ssh_authorized_keys = file(var.public_key_path)
+    ssh_authorized_keys = local.ssh_public_key
   }
 
-  display_name = "worker-${count.index}"
+  display_name = "z_worker_${count.index}"
 }
