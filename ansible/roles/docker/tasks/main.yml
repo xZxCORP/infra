@@ -1,0 +1,65 @@
+---
+- name: Set architecture specific variables
+  ansible.builtin.set_fact:
+    arch: "{{ 'arm64' if ansible_facts.architecture == 'aarch64' else 'amd64' }}"
+- name: Install common packages
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    force: false
+    install_recommends: false
+- name: Create {{ apt_keyrings_dir }}
+  ansible.builtin.file:
+    path: "{{ apt_keyrings_dir }}"
+    state: directory
+    mode: "0755"
+- name: Download Docker GPG key
+  ansible.builtin.get_url:
+    url: "{{ docker_gpg_url }}"
+    dest: /tmp/docker.gpg
+    mode: "0644"
+- name: Import Docker GPG key
+  ansible.builtin.command:
+    cmd: gpg --dearmor --output {{ docker_gpg_file }} /tmp/docker.gpg
+    creates: "{{ docker_gpg_file }}"
+
+- name: Set proper permissions for the GPG key
+  ansible.builtin.file:
+    path: "{{ docker_gpg_file }}"
+    mode: "0644"
+
+- name: Add Docker APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ arch }} signed-by={{ docker_gpg_file }}] {{ docker_apt_repository }} {{ ansible_distribution_release }} stable"
+    state: present
+    update_cache: true
+    filename: docker
+- name: Install docker packages
+  ansible.builtin.apt:
+    name:
+      - docker-ce={{ docker_apt_version }}
+      - docker-ce-cli={{ docker_apt_version }}
+      - containerd.io
+      - docker-buildx-plugin
+    state: present
+    force: false
+    install_recommends: false
+    update_cache: true
+- name: Start and enable Docker service
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    daemon_reload: true
+    enabled: true
+- name: Create Docker group
+  ansible.builtin.group:
+    name: docker
+    state: present
+- name: Add user to Docker group
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true

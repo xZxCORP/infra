@@ -1,0 +1,4 @@
+---
+ansible_user: ubuntu
+ansible_ssh_private_key_file: ~/.ssh/gpe-vm
+apt_keyrings_dir: /etc/apt/keyrings
