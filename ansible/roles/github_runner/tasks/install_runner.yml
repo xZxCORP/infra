@@ -1,0 +1,107 @@
+---
+- name: Define runner variables
+  set_fact:
+    current_runner_name: "{{ runner.name | default(ansible_hostname ~ '-' ~ loop_index) }}"
+    current_runner_dir: "{{ runner.dir | default(github_runner_base_dir ~ '/' ~ (runner.name | default('runner' ~ loop_index))) }}"
+    current_runner_user: "{{ runner.user | default(github_runner_user) }}"
+    current_runner_labels: "{{ runner.labels | default([]) }}"
+    current_architecture: "{{ runner.architecture | default(github_runner_default_architecture) }}"
+
+- name: Generate registration token via GitHub API
+  ansible.builtin.uri:
+    url: "https://api.github.com/orgs/{{ github_runner_organization }}/actions/runners/registration-token"
+    method: POST
+    headers:
+      Authorization: "token {{ github_runner_api_token }}"
+      Accept: "application/vnd.github.v3+json"
+    status_code: 201
+    body_format: json
+  register: token_response
+  delegate_to: localhost
+  become: false
+
+- name: Extract access token
+  set_fact:
+    runner_token: "{{ token_response.json.token }}"
+
+- name: Create the runner directory
+  ansible.builtin.file:
+    path: "{{ current_runner_dir }}"
+    state: directory
+    owner: "{{ current_runner_user }}"
+    group: "{{ current_runner_user }}"
+    mode: "0750"
+  become: true
+
+- name: Download and extract the runner binary as root
+  ansible.builtin.unarchive:
+    src: "https://github.com/actions/runner/releases/download/v{{ github_runner_version }}/actions-runner-linux-{{ current_architecture }}-{{ github_runner_version }}.tar.gz"
+    dest: "{{ current_runner_dir }}"
+    remote_src: true
+  become: true
+
+- name: Set correct ownership for runner files
+  ansible.builtin.file:
+    path: "{{ current_runner_dir }}"
+    owner: "{{ current_runner_user }}"
+    group: "{{ current_runner_user }}"
+    recurse: yes
+  become: true
+
+- name: Install dependencies
+  ansible.builtin.command:
+    cmd: ./bin/installdependencies.sh
+    chdir: "{{ current_runner_dir }}"
+  become: true
+  args:
+    creates: "{{ current_runner_dir }}/installed_dependencies"
+  register: dependencies_result
+  changed_when: dependencies_result.rc == 0
+
+- name: Prepare the runner configuration
+  ansible.builtin.set_fact:
+    runner_labels_string: "{{ current_runner_labels | join(',') }}"
+  when: current_runner_labels | length > 0
+
+- name: Check if runner is already configured
+  ansible.builtin.stat:
+    path: "{{ current_runner_dir }}/.runner"
+  register: runner_configured
+  become: true
+
+- name: Create script for configuring runner
+  ansible.builtin.template:
+    src: configure_runner.sh.j2
+    dest: "{{ current_runner_dir }}/configure_runner.sh"
+    owner: "{{ current_runner_user }}"
+    group: "{{ current_runner_user }}"
+    mode: "0755"
+  become: true
+  when: not runner_configured.stat.exists
+
+- name: Configure the runner
+  ansible.builtin.command:
+    cmd: "sudo -u {{ current_runner_user }} {{ current_runner_dir }}/configure_runner.sh"
+    chdir: "{{ current_runner_dir }}"
+  become: true
+  register: config_result
+  changed_when: config_result.rc == 0
+  when: not runner_configured.stat.exists
+
+- name: Install the runner as a service
+  ansible.builtin.command:
+    cmd: ./svc.sh install {{ current_runner_user }}
+    chdir: "{{ current_runner_dir }}"
+  become: true
+  args:
+    creates: "/etc/systemd/system/actions.runner.{{ github_runner_organization }}.{{ current_runner_name }}.service"
+  when: github_runner_as_service
+
+- name: Start and enable the runner service
+  ansible.builtin.systemd:
+    name: "actions.runner.{{ github_runner_organization }}.{{ current_runner_name }}.service"
+    state: started
+    enabled: true
+    daemon_reload: true
+  become: true
+  when: github_runner_as_service

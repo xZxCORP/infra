@@ -1,0 +1,26 @@
+---
+- name: Install deps
+  ansible.builtin.package:
+    name:
+      - curl
+      - tar
+      - unzip
+      - jq
+      - git
+    state: present
+  become: true
+
+- name: Create github runner user
+  ansible.builtin.user:
+    name: "{{ github_runner_user }}"
+    shell: /bin/bash
+    system: true
+    createhome: true
+  become: true
+
+- name: Install runner
+  ansible.builtin.include_tasks: install_runner.yml
+  loop: "{{ github_runner_data }}"
+  loop_control:
+    loop_var: runner
+    index_var: loop_index

@@ -1,0 +1,30 @@
+---
+- name: Install and configure cluster
+  hosts:
+    - master
+    - worker
+  roles:
+    - role: k3s
+      vars:
+        k3s_node_type: "{{ 'master' if inventory_hostname in groups['master'] else 'worker' }}"
+  become: true
+- name: Install and configure github runners
+  hosts:
+    - runner
+  roles:
+    - role: github_runner
+      vars:
+        github_runner_api_token: "{{ github_api_token }}"
+        github_runner_organization: "xZxCORP"
+        github_runner_data:
+          - name: "runner1"
+            labels: ["linux", "arm64"]
+            user: "github-runner"
+            dir: "/opt/github-runner/runner1"
+            architecture: "arm64"
+          - name: "runner2"
+            labels: ["linux", "arm64"]
+            user: "github-runner"
+            dir: "/opt/github-runner/runner2"
+            architecture: "arm64"
+  become: true
