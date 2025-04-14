@@ -8,6 +8,8 @@
       - jq
       - git
     state: present
+    update_cache: true
+
   become: true
 
 - name: Create github runner user

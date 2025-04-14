@@ -1,13 +1,24 @@
 ---
-- name: Install and configure cluster
-  hosts:
-    - master
-    - worker
+- name: Deploy K3s master
+  hosts: master
+  become: true
   roles:
     - role: k3s
       vars:
-        k3s_node_type: "{{ 'master' if inventory_hostname in groups['master'] else 'worker' }}"
+        k3s_node_type: master
+  tags:
+    - k3s
+- name: Deploy K3s workers
+  hosts: worker
   become: true
+  roles:
+    - role: k3s
+      vars:
+        k3s_node_type: worker
+        k3s_server_url: "{{ hostvars[groups['master'][0]]['ansible_default_ipv4']['address'] }}"
+        k3s_node_token: "{{ hostvars[groups['master'][0]]['k3s_node_token'] }}"
+  tags:
+    - k3s
 - name: Install and configure github runners
   hosts:
     - runner
@@ -28,3 +39,5 @@
             dir: "/opt/github-runner/runner2"
             architecture: "arm64"
   become: true
+  tags:
+    - ci

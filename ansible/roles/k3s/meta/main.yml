@@ -4,5 +4,3 @@ galaxy_info:
   license: BSD-3-Clause
   galaxy_tags: []
   author: ETNA
-dependencies:
-  - role: docker
