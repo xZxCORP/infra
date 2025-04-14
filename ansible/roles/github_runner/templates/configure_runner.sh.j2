@@ -1,0 +1,9 @@
+#!/bin/bash
+cd {{ current_runner_dir }}
+./config.sh \
+  --url https://github.com/{{ github_runner_organization }} \
+  --token {{ runner_token }} \
+  --name {{ current_runner_name }} \
+  {% if current_runner_labels | length > 0 %}--labels {{ runner_labels_string }} {% endif %} \
+  --unattended \
+  --replace

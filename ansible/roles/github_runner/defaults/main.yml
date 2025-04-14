@@ -1,0 +1,16 @@
+---
+github_runner_api_token: ""
+github_runner_organization: ""
+github_runner_data:
+  - name: "runner1"
+    access_token: "TOKEN1"
+    labels: ["linux", "prod"]
+    user: "github-runner"
+    dir: "/opt/github-runner/runner1"
+    architecture: "arm64"
+
+github_runner_version: "2.323.0"
+github_runner_user: "github-runner"
+github_runner_base_dir: "/opt/github-runner"
+github_runner_as_service: true
+github_runner_default_architecture: "{{ ansible_architecture | regex_replace('^aarch64$', 'arm64') | regex_replace('^x86_64$', 'x64') }}"
