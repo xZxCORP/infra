@@ -45,14 +45,11 @@ After collecting all the information, fill out the `terraform.tfvars` following 
 
 ### Cluster
 
-#### Env
-Configure `.env` file before running the scripts
-
-#### Order of scripts to run
-- deploy_iptables
-- deploy_cluster
-- deploy_runner
-- deploy_stacks
+#### Deploy the required component to run the CI
+- create the cluster ansible vault password
+  - `touch ansible/.vault-pass.txt`
+- deploy the cluster github runner in local to use the Github Action after the first deployment
+- `cd ansible && ansible-playbook cluster.yml --tags=ci`
 
 ## Contributing
 

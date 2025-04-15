@@ -1,6 +1,6 @@
 ---
 - name: Define runner variables
-  set_fact:
+  ansible.builtin.set_fact:
     current_runner_name: "{{ runner.name | default(ansible_hostname ~ '-' ~ loop_index) }}"
     current_runner_dir: "{{ runner.dir | default(github_runner_base_dir ~ '/' ~ (runner.name | default('runner' ~ loop_index))) }}"
     current_runner_user: "{{ runner.user | default(github_runner_user) }}"
@@ -21,7 +21,7 @@
   become: false
 
 - name: Extract access token
-  set_fact:
+  ansible.builtin.set_fact:
     runner_token: "{{ token_response.json.token }}"
 
 - name: Create the runner directory
@@ -35,7 +35,10 @@
 
 - name: Download and extract the runner binary as root
   ansible.builtin.unarchive:
-    src: "https://github.com/actions/runner/releases/download/v{{ github_runner_version }}/actions-runner-linux-{{ current_architecture }}-{{ github_runner_version }}.tar.gz"
+    src: >
+      https://github.com/actions/runner/releases/download/
+      v{{ github_runner_version }}
+      /actions-runner-linux-{{ current_architecture }}-{{ github_runner_version }}.tar.gz
     dest: "{{ current_runner_dir }}"
     remote_src: true
   become: true
@@ -45,7 +48,7 @@
     path: "{{ current_runner_dir }}"
     owner: "{{ current_runner_user }}"
     group: "{{ current_runner_user }}"
-    recurse: yes
+    recurse: true
   become: true
 
 - name: Install dependencies

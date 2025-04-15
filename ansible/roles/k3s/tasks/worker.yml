@@ -19,15 +19,27 @@
   ansible.builtin.set_fact:
     k3s_master_url: "https://{{ k3s_server_url | regex_replace('^https?://', '') }}:6443"
 
-- name: Install K3s agent directly
-  ansible.builtin.shell: |
-    curl -sfL https://get.k3s.io | \
-    INSTALL_K3S_VERSION={{ k3s_version }} \
-    K3S_URL={{ k3s_master_url }} \
-    K3S_TOKEN={{ k3s_node_token }} \
-    sh -
-  args:
+- name: Download K3s install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s-install.sh
+    mode: '0755'
+  become: true
+
+- name: Install K3s agent
+  ansible.builtin.command:
+    cmd: /tmp/k3s-install.sh
     creates: /usr/local/bin/k3s
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+    K3S_URL: "{{ k3s_master_url }}"
+    K3S_TOKEN: "{{ k3s_node_token }}"
   become: true
   register: k3s_agent_install
   when: not k3s_binary.stat.exists
+
+- name: Remove K3s install script
+  ansible.builtin.file:
+    path: /tmp/k3s-install.sh
+    state: absent
+  become: true

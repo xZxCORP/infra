@@ -5,27 +5,37 @@
   register: k3s_binary
   become: true
 
-- name: Install K3s server directly
-  ansible.builtin.shell: |
-    curl -sfL https://get.k3s.io | \
-    INSTALL_K3S_VERSION={{ k3s_version }} \
-    K3S_TOKEN={{ k3s_node_token }} \
-    sh -s - server \
-    --advertise-address={{ ansible_default_ipv4.address }} \
-    --tls-san={{ ansible_default_ipv4.address }} \
-    --bind-address=0.0.0.0 \
-    {{ k3s_extra_args }}
-  args:
+- name: Download K3s install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s-install.sh
+    mode: '0755'
+  become: true
+
+- name: Install K3s server
+  ansible.builtin.command:
+    cmd: >
+      /tmp/k3s-install.sh
+      {{ k3s_extra_args }}
     creates: /usr/local/bin/k3s
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+    K3S_TOKEN: "{{ k3s_node_token }}"
+    K3S_ADVERTISE_ADDRESS: "{{ ansible_default_ipv4.address }}"
+    K3S_TLS_SAN: "{{ ansible_default_ipv4.address }}"
+    K3S_BIND_ADDRESS: "0.0.0.0"
   become: true
   register: k3s_server_install
   when: not k3s_binary.stat.exists
+  notify: Wait for node-token file
 
-- name: Wait for node-token file to be generated
-  ansible.builtin.wait_for:
-    path: /var/lib/rancher/k3s/server/node-token
+- name: Remove K3s install script
+  ansible.builtin.file:
+    path: /tmp/k3s-install.sh
+    state: absent
   become: true
-  when: k3s_server_install.changed
+
+
 - name: Get K3s node token
   ansible.builtin.slurp:
     src: /var/lib/rancher/k3s/server/node-token

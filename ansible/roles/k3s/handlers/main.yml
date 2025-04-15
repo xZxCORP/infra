@@ -10,3 +10,7 @@
     name: k3s-agent
     state: restarted
   become: true
+- name: Wait for node-token file
+  ansible.builtin.wait_for:
+    path: /var/lib/rancher/k3s/server/node-token
+  become: true

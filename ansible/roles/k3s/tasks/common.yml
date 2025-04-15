@@ -17,16 +17,16 @@
 - name: Flush NAT table rules
   ansible.builtin.iptables:
     table: nat
-    flush: yes
+    flush: true
 
 - name: Flush Mangle table rules
   ansible.builtin.iptables:
     table: mangle
-    flush: yes
+    flush: true
 
 - name: Flush filter table rules
   ansible.builtin.iptables:
-    flush: yes
+    flush: true
 - name: Allow all incoming, outgoing, and forwarding traffic
   ansible.builtin.iptables:
     chain: INPUT
@@ -45,3 +45,4 @@
 - name: Save iptables rules
   ansible.builtin.shell: iptables-save > /etc/iptables/rules.v4
   become: true
+  changed_when: false
