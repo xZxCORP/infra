@@ -26,9 +26,9 @@ To deploy the Oracle Cloud infrastructure, you have to get some informations :
   - You have this information on the dashboard
 - your api key fingerprint
   - You have this information on the dashboard
-- your oci private key path
-  - Default value is good
-- your ssh public key path
+- your oci private key
+- your ssh private key 
+- your ssh public key
   - Usually on ~/.ssh folder
 - your availibility domain
   - `oci iam availability-domain list`

@@ -1,7 +1,3 @@
-locals {
-  ssh_public_key  = file(var.ssh_public_key_path)
-  ssh_private_key = file(var.ssh_private_key_path)
-}
 
 resource "oci_core_instance" "z_master" {
   availability_domain = var.availability_domain
@@ -16,7 +12,7 @@ resource "oci_core_instance" "z_master" {
     assign_public_ip = true
   }
   metadata = {
-    ssh_authorized_keys = local.ssh_public_key
+    ssh_authorized_keys = var.ssh_public_key
   }
   source_details {
     source_type = "image"
@@ -38,7 +34,7 @@ resource "oci_core_instance" "z_runner" {
     assign_public_ip = true
   }
   metadata = {
-    ssh_authorized_keys = local.ssh_public_key
+    ssh_authorized_keys = var.ssh_public_key
   }
   source_details {
     source_type = "image"
@@ -70,7 +66,7 @@ resource "oci_core_instance" "z_worker" {
 
   }
   metadata = {
-    ssh_authorized_keys = local.ssh_public_key
+    ssh_authorized_keys = var.ssh_public_key
   }
 
   display_name = "z_worker_${count.index}"
