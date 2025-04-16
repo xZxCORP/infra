@@ -35,10 +35,10 @@
 
 - name: Download and extract the runner binary as root
   ansible.builtin.unarchive:
-    src: >
-      https://github.com/actions/runner/releases/download/
-      v{{ github_runner_version }}
-      /actions-runner-linux-{{ current_architecture }}-{{ github_runner_version }}.tar.gz
+    src: "
+      https://github.com/actions/runner/releases/download/\
+      v{{ github_runner_version }}\
+      /actions-runner-linux-{{ current_architecture }}-{{ github_runner_version }}.tar.gz"
     dest: "{{ current_runner_dir }}"
     remote_src: true
   become: true
