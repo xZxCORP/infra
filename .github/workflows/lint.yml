@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Create vault password file
         run: |
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault-pass.txt
+          echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > .vault-pass.txt
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
         with:
