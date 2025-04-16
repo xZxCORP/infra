@@ -12,6 +12,7 @@
 - [Terraform cli](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 - [OCI cli](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm)
   - Configured with `oci config setup`
+- Transcrypt cli
 
 ## Usage
 
@@ -39,6 +40,9 @@ To deploy the Oracle Cloud infrastructure, you have to get some informations :
   - https://docs.oracle.com/en-us/iaas/images/
 
 After collecting all the information, fill out the `terraform.tfvars` following the structure of `variables.tf`
+OR
+
+- decrypt the `terraform.tfvars` file with the `transcrypt` cli
 
 - `terraform init`
 - `terraform apply`
