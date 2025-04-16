@@ -16,7 +16,7 @@ jobs:
           git config --global --add safe.directory "$(pwd)"
       - name: Create vault password file
         run: |
-          echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > .vault-pass.txt
+          echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > ./ansible/.vault-pass.txt
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
         with:
