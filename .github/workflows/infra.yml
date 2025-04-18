@@ -16,6 +16,11 @@ jobs:
       infrastructure_changed: ${{ steps.check_changes.outputs.has_changes }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+      - name: Pull Latest Changes
+        run: git pull origin main
       - name: Setup Transcrypt
         run: |
           git clone https://github.com/elasticdog/transcrypt.git
