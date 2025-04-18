@@ -38,20 +38,21 @@ jobs:
       - name: Terraform Plan
         working-directory: ./terraform
         run: terraform plan -var-file=terraform.tfvars -out=tfplan
-      - name: Terraform Apply
-        id: apply
+      - name: Check for Changes in Plan
+        id: check_changes
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         working-directory: ./terraform
         run: |
-          # Vérifier si le plan contient des changements
           if terraform show -json tfplan | grep -q '"resource_changes":'
           then
             echo "changes_detected=true" >> $GITHUB_OUTPUT
-            terraform apply -auto-approve tfplan
           else
-            echo "No changes to apply. Infrastructure is up-to-date."
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.check_changes.outputs.changes_detected == 'true'
+        working-directory: ./terraform
+        run: terraform apply -auto-approve tfplan
       - name: Generate Ansible Inventory
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.apply.outputs.changes_detected == 'true'
         working-directory: ./terraform
