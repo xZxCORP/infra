@@ -19,7 +19,15 @@
     system: true
     createhome: true
   become: true
-
+- name: Setup sudoers for GitHub runner (no password)
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/github-runner
+    line: "{{ github_runner_user }} ALL=(ALL) NOPASSWD:ALL"
+    state: present
+    mode: "0440"
+    create: yes
+    validate: "visudo -cf %s"
+  become: true
 - name: Install runner
   ansible.builtin.include_tasks: install_runner.yml
   loop: "{{ github_runner_data }}"
