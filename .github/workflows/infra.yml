@@ -50,11 +50,12 @@ jobs:
           else
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
-      - name: Copy Inventory to Ansible Directory
+      - name: Generate Ansible Inventory
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.apply.outputs.changes_detected == 'true'
+        working-directory: ./terraform
         run: |
-          mkdir -p ansible/inventory
-          cp terraform/inventory ansible/inventory/hosts
+          mkdir -p ../ansible/inventory
+          terraform output -raw ansible_inventory > ../ansible/inventory/hosts
       - name: Commit Inventory File
         if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.apply.outputs.changes_detected == 'true'
         run: |

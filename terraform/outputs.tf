@@ -12,11 +12,10 @@ output "worker_public_ips" {
   value       = oci_core_instance.z_worker[*].public_ip
 }
 
-resource "local_file" "ansible_inventory" {
-  content = templatefile("${path.module}/inventory.tftpl", {
+output "ansible_inventory" {
+  value = templatefile("${path.module}/inventory.tftpl", {
     master_ip  = oci_core_instance.z_master.public_ip,
     runner_ip  = oci_core_instance.z_runner.public_ip,
     worker_ips = oci_core_instance.z_worker[*].public_ip
   })
-  filename = "${path.module}/inventory"
 }
