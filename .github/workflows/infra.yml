@@ -43,11 +43,13 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         working-directory: ./terraform
         run: |
-          terraform apply -auto-approve tfplan
+          # Vérifier si le plan contient des changements
           if terraform show -json tfplan | grep -q '"resource_changes":'
           then
             echo "changes_detected=true" >> $GITHUB_OUTPUT
+            terraform apply -auto-approve tfplan
           else
+            echo "No changes to apply. Infrastructure is up-to-date."
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
       - name: Generate Ansible Inventory
