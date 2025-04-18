@@ -25,7 +25,7 @@
     line: "{{ github_runner_user }} ALL=(ALL) NOPASSWD:ALL"
     state: present
     mode: "0440"
-    create: yes
+    create: true
     validate: "visudo -cf %s"
   become: true
 - name: Install runner

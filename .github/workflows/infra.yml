@@ -27,6 +27,9 @@ jobs:
       - name: Decrypt with Transcrypt
         run: |
           transcrypt -c aes-256-cbc -p '${{ secrets.TRANSCRYPT_PASSWORD }}' -y
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
