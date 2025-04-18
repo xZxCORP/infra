@@ -8,7 +8,7 @@ on:
       - main
 jobs:
   terraform:
-    runs-on: [self-hosted, ubuntu-latest]
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write

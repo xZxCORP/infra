@@ -29,12 +29,12 @@
         github_runner_organization: "xZxCORP"
         github_runner_data:
           - name: "runner1"
-            labels: ["linux", "arm64"]
+            labels: ["ubuntu-latest"]
             user: "github-runner"
             dir: "/opt/github-runner/runner1"
             architecture: "arm64"
           - name: "runner2"
-            labels: ["linux", "arm64"]
+            labels: ["ubuntu-latest"]
             user: "github-runner"
             dir: "/opt/github-runner/runner2"
             architecture: "arm64"
