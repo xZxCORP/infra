@@ -1,9 +1,7 @@
 [master]
-master_01 ansible_host=158.178.193.67
-
+master_01 ansible_host=141.253.120.112
 [worker]
-worker_01 ansible_host=141.253.123.115
-worker_02 ansible_host=158.178.211.48
-
+worker_01 ansible_host=89.168.50.89
+worker_02 ansible_host=158.178.192.169
 [runner]
-runner_01 ansible_host=141.253.97.139
+runner_01 ansible_host=141.253.109.145
