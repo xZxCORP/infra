@@ -1,0 +1,77 @@
+name: Infra
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  terraform:
+    runs-on: [self-hosted, ubuntu-latest]
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      infrastructure_changed: ${{ steps.apply.outputs.changes_detected }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Transcrypt
+        run: |
+          git clone https://github.com/elasticdog/transcrypt.git
+          cd transcrypt
+          sudo ln -s "${PWD}/transcrypt" /usr/local/bin/transcrypt
+      - name: Decrypt with Transcrypt
+        run: |
+          transcrypt -c aes-256-cbc -p '${{ secrets.TRANSCRYPT_PASSWORD }}' -y
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+      - name: Terraform Validate
+        working-directory: ./terraform
+        run: terraform validate
+      - name: Terraform Plan
+        working-directory: ./terraform
+        run: terraform plan -var-file=terraform.tfvars -out=tfplan
+      - name: Terraform Apply
+        id: apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        working-directory: ./terraform
+        run: |
+          terraform apply -auto-approve tfplan
+          if terraform show -json tfplan | grep -q '"resource_changes":'
+          then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Copy Inventory to Ansible Directory
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.apply.outputs.changes_detected == 'true'
+        run: |
+          mkdir -p ansible/inventory
+          cp terraform/inventory ansible/inventory/hosts
+      - name: Commit Inventory File
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.apply.outputs.changes_detected == 'true'
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add ansible/inventory/hosts
+          git commit -m "Update Ansible inventory [skip ci]"
+          git push
+  lint:
+    runs-on: self-hosted
+    needs: terraform
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Git safe directory
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+      - name: Create vault password file
+        run: |
+          echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > ./ansible/.vault-pass.txt
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
+        with:
+          working_directory: "./ansible"

@@ -4,6 +4,14 @@ terraform {
       source = "oracle/oci"
     }
   }
+  cloud {
+
+    organization = "wheelz"
+
+    workspaces {
+      name = "wheelz-prod"
+    }
+  }
 }
 
 data "oci_identity_availability_domains" "z_ads" {
