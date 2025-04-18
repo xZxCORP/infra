@@ -13,7 +13,7 @@ jobs:
       contents: write
       pull-requests: write
     outputs:
-      infrastructure_changed: ${{ steps.apply.outputs.changes_detected }}
+      infrastructure_changed: ${{ steps.plan.outputs.exit_code }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Transcrypt
@@ -29,43 +29,34 @@ jobs:
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
       - name: Terraform Init
-       
         working-directory: ./terraform
         run: terraform init
       - name: Terraform Validate
         working-directory: ./terraform
         run: terraform validate
-      - name: Terraform Plan
-        working-directory: ./terraform
-        run: terraform plan -var-file=terraform.tfvars -out=tfplan
-      - name: Check for Changes in Plan
-        id: check_changes
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      - name: Plan Terraform Changes
+        id: plan
         working-directory: ./terraform
         run: |
-          if terraform show -json tfplan | grep -q '"resource_changes":'
-          then
-            echo "changes_detected=true" >> $GITHUB_OUTPUT
-          else
-            echo "changes_detected=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.check_changes.outputs.changes_detected == 'true'
+          terraform plan -var-file=terraform.tfvars -detailed-exitcode -out=tfplan || code=$?
+          echo "exit_code=$code" >> $GITHUB_OUTPUT
+      - name: Apply Terraform Changes
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.plan.outputs.exit_code == '2'
         working-directory: ./terraform
         run: terraform apply -auto-approve tfplan
       - name: Generate Ansible Inventory
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.apply.outputs.changes_detected == 'true'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.plan.outputs.exit_code == '2'
         working-directory: ./terraform
         run: |
           mkdir -p ../ansible/inventory
           terraform output -raw ansible_inventory > ../ansible/inventory/hosts
       - name: Commit Inventory File
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.apply.outputs.changes_detected == 'true'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.plan.outputs.exit_code == '2'
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
           git add ansible/inventory/hosts
-          git commit -m "Update Ansible inventory [skip ci]"
+          git commit -m "Update Ansible inventory [skip ci]" || echo "No changes to commit"
           git push
   lint:
     runs-on: self-hosted
