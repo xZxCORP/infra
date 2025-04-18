@@ -19,8 +19,7 @@ jobs:
       - name: Setup Transcrypt
         run: |
           git clone https://github.com/elasticdog/transcrypt.git
-          cd transcrypt
-          sudo ln -s "${PWD}/transcrypt" /usr/local/bin/transcrypt
+          echo "PATH=$(pwd)/transcrypt:$PATH" >> $GITHUB_ENV
       - name: Decrypt with Transcrypt
         run: |
           transcrypt -c aes-256-cbc -p '${{ secrets.TRANSCRYPT_PASSWORD }}' -y
