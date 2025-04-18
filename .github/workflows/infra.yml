@@ -26,7 +26,7 @@ jobs:
           echo "PATH=$(pwd)/transcrypt:$PATH" >> $GITHUB_ENV
       - name: Decrypt with Transcrypt
         run: |
-          transcrypt -c aes-256-cbc -p '${{ secrets.TRANSCRYPT_PASSWORD }}' -y
+          transcrypt -c aes-256-cbc -p '${{ secrets.TRANSCRYPT_PASSWORD }}' -y || true
       - uses: actions/setup-node@v4
         with:
           node-version: 'latest'
