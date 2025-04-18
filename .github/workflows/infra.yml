@@ -114,7 +114,12 @@ jobs:
       - name: Create vault password file
         run: |
           echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > ./ansible/.vault-pass.txt
-      
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/gpe-vm
+          chmod 600 ~/.ssh/gpe-vm
+          echo -e "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null" > ~/.ssh/config
       - name: Run Ansible Playbook
         working-directory: ./ansible
         run: |
