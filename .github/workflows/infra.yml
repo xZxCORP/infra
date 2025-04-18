@@ -8,7 +8,7 @@ on:
       - main
 jobs:
   terraform:
-    runs-on: ubuntu-latest
+    runs-on: Linux
     permissions:
       contents: write
       pull-requests: write
@@ -72,7 +72,7 @@ jobs:
           git push
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: Linux
     needs: terraform
     steps:
       - uses: actions/checkout@v4
@@ -88,7 +88,7 @@ jobs:
           working_directory: "./ansible"
 
   ansible:
-    runs-on: ubuntu-latest
+    runs-on: Linux
     needs: [terraform, lint]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
