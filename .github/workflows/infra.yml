@@ -16,6 +16,10 @@ jobs:
       infrastructure_changed: ${{ steps.check_changes.outputs.has_changes }}
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies for Transcrypt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bsdmainutils
       - name: Setup Transcrypt
         run: |
           git clone https://github.com/elasticdog/transcrypt.git
