@@ -42,7 +42,7 @@ jobs:
           echo "$PLAN_OUTPUT"
           
           # Vérifier si le message "No changes" est présent
-          if echo "$PLAN_OUTPUT" | grep -q "No changes. Your infrastructure matches the configuration."; then
+          if echo "$PLAN_OUTPUT" | grep -q "Your infrastructure matches the configuration."; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "Aucun changement détecté"
           else
