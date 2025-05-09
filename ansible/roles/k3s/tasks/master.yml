@@ -49,11 +49,20 @@
     path: "{{ ansible_env.HOME }}/.kube"
     state: directory
     mode: '0700'
-
+- name: Ensure .kube directory exists
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.kube"
+    state: directory
+    mode: '0700'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  become: true
 - name: Copy kubeconfig for user
   ansible.builtin.copy:
     src: /etc/rancher/k3s/k3s.yaml
-    dest: "{{ ansible_env.HOME }}/.kube/config"
+    dest: "/home/{{ ansible_user }}/.kube/config"
     remote_src: true
     mode: '0600'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
   become: true
