@@ -4,7 +4,7 @@ github_runner_organization: ""
 github_runner_data:
   - name: "runner1"
     access_token: "TOKEN1"
-    labels: ["linux", "prod"]
+    labels: ["ubuntu-latest", "linux", "prod"]
     user: "github-runner"
     dir: "/opt/github-runner/runner1"
     architecture: "arm64"
