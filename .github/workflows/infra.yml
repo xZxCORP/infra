@@ -88,16 +88,11 @@ jobs:
       - name: Create vault password file
         run: |
           echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > ./ansible/.vault-pass.txt
-      - name: Install Ansible
-        run: |
-          python -m pip install --upgrade pip
-          pip install ansible
-          ansible-galaxy collection install kubernetes.core
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
         with:
           working_directory: "./ansible"
-          requirements_file: "./ansible/requirements.yml"
+          requirements_file: "./requirements.yml"
 
   ansible:
     runs-on: ubuntu-latest
