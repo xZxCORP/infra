@@ -35,7 +35,6 @@
     state: absent
   become: true
 
-
 - name: Get K3s node token
   ansible.builtin.slurp:
     src: /var/lib/rancher/k3s/server/node-token

@@ -6,8 +6,11 @@
     - role: k3s
       vars:
         k3s_node_type: master
-  tags:
-    - k3s
+      tags:
+        - k3s
+    - role: helm
+      tags:
+        - helm
 - name: Deploy K3s workers
   hosts: worker
   become: true

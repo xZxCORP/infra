@@ -1,0 +1,40 @@
+---
+- name: Install common packages
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+    state: present
+    force: false
+    install_recommends: false
+- name: Get system architecture
+  ansible.builtin.command: dpkg --print-architecture
+  register: system_architecture
+  changed_when: false
+
+- name: Set architecture fact
+  ansible.builtin.set_fact:
+    architecture: "{{ system_architecture.stdout }}"
+- name: Create {{ apt_keyrings_dir }}
+  ansible.builtin.file:
+    path: "{{ apt_keyrings_dir }}"
+    state: directory
+    mode: "0755"
+- name: Download Helm GPG key
+  ansible.builtin.get_url:
+    url: "{{ helm_gpg_url }}"
+    dest: /tmp/helm.gpg
+    mode: "0644"
+- name: Import Helm GPG key
+  ansible.builtin.command:
+    cmd: gpg --dearmor --output {{ helm_gpg_file }} /tmp/helm.gpg
+    creates: "{{ helm_gpg_file }}"
+- name: Add Helm APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ architecture }} signed-by={{ helm_gpg_file }}] {{ helm_apt_repository }} all main"
+    state: present
+    update_cache: true
+    filename: helm
+- name: Install Helm
+  ansible.builtin.apt:
+    name: helm
+    state: present
