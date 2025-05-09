@@ -93,6 +93,7 @@ jobs:
         with:
           working_directory: "./ansible"
           requirements_file: "./requirements.yml"
+          arguments: "--vault-password-file=.vault-pass.txt"
 
   ansible:
     runs-on: ubuntu-latest
