@@ -1,2 +1,4 @@
 ---
-argo_cd_repo_url:
+argo_cd_repo_url: "https://argoproj.github.io/argo-helm"
+argo_cd_namespace: "argocd"
+argo_cd_kubernetes_config_dir: "/home/{{ ansible_user }}/.kube/config"

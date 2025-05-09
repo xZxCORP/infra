@@ -1,0 +1,31 @@
+---
+- name: Add Argo CD Helm repository
+  kubernetes.core.helm_repository:
+    name: argo
+    repo_url: "{{ argo_cd_repo_url }}"
+    state: present
+  environment:
+    KUBECONFIG: "{{ argo_cd_kubernetes_config_dir }}"
+
+- name: Install Argo CD via Helm
+  kubernetes.core.helm:
+    name: argocd
+    chart_ref: argo/argo-cd
+    release_namespace: "{{ argo_cd_namespace }}"
+    create_namespace: true
+    wait: true
+  environment:
+    KUBECONFIG: "{{ argo_cd_kubernetes_config_dir }}"
+- name: Wait for Argo CD server pod to be ready
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: "{{ argo_cd_namespace }}"
+    label_selector: app.kubernetes.io/name=argocd-server
+    wait: true
+    wait_timeout: 300
+    wait_condition:
+      type: Ready
+      status: "True"
+  register: argocd_server_pod
+  environment:
+    KUBECONFIG: "{{ argo_cd_kubernetes_config_dir }}"
