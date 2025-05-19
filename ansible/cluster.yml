@@ -11,9 +11,6 @@
     - role: helm
       tags:
         - helm
-    - role: argo_cd
-      tags:
-        - argo_cd
 - name: Deploy K3s workers
   hosts: worker
   become: true
@@ -25,6 +22,12 @@
         k3s_node_token: "{{ hostvars[groups['master'][0]]['k3s_node_token'] }}"
   tags:
     - k3s
+- name: Deploy argo cd
+  hosts: master
+  roles:
+    - role: argo_cd
+  tags:
+    - argo_cd
 - name: Install and configure github runners
   hosts:
     - runner
