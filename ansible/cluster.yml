@@ -1,4 +1,13 @@
 ---
+- name: Install Docker Swarm
+  hosts:
+    - master
+    - worker
+  roles:
+    - role: docker_swarm
+  become: true
+  tags:
+    - swarm
 - name: Install and configure github runners
   hosts:
     - runner
