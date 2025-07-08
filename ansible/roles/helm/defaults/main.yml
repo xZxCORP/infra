@@ -1,5 +1,0 @@
----
-helm_cdn_url: "https://baltocdn.com/helm"
-helm_apt_repository: "{{ helm_cdn_url }}/stable/debian/"
-helm_gpg_url: "{{ helm_cdn_url }}/signing.asc"
-helm_gpg_file: "{{ apt_keyrings_dir }}/helm.gpg"

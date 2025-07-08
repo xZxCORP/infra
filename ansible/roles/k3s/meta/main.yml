@@ -1,6 +1,0 @@
-galaxy_info:
-  min_ansible_version: "2.1"
-  description: K3S cluster setup
-  license: BSD-3-Clause
-  galaxy_tags: []
-  author: ETNA
