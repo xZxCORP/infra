@@ -1,0 +1,37 @@
+---
+- name: Check if node is already part of a swarm
+  ansible.builtin.command: docker info --format '{{ "{{" }}.Swarm.LocalNodeState{{ "}}" }}'
+  register: swarm_status
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Join swarm as worker
+  ansible.builtin.command: >
+    docker swarm join
+    --token {{ docker_swarm_worker_token }}
+    {{ docker_swarm_manager_endpoint }}
+  when:
+    - docker_swarm_role == "worker"
+    - swarm_status.stdout != "active"
+    - docker_swarm_worker_token is defined
+    - docker_swarm_manager_endpoint is defined
+  register: swarm_worker_join
+  changed_when: swarm_worker_join.rc == 0
+  become: true
+  notify: Swarm_joined
+
+- name: Verify worker joined swarm
+  ansible.builtin.command: docker info --format '{{ "{{" }}.Swarm.LocalNodeState{{ "}}" }}'
+  register: verify_worker
+  changed_when: false
+  failed_when: verify_worker.stdout != "active"
+  become: true
+  when: docker_swarm_role == "worker"
+
+- name: Display worker join result
+  ansible.builtin.debug:
+    msg: "Worker {{ inventory_hostname }} joined swarm successfully"
+  when:
+    - swarm_worker_join is defined
+    - swarm_worker_join.changed

@@ -1,0 +1,44 @@
+---
+- name: Install Docker prerequisites
+  ansible.builtin.package:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+  become: true
+- name: Add Docker GPG key
+  ansible.builtin.apt_key:
+    url: "{{ docker_swarm_docker_gpg_key_url }}"
+    state: present
+  become: true
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: "{{ docker_swarm_docker_repository }}"
+    state: present
+    update_cache: true
+  become: true
+
+- name: Install Docker
+  ansible.builtin.package:
+    name: docker-ce
+    state: present
+  become: true
+  notify: Restart docker
+
+- name: Start and enable Docker service
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true
+  become: true
+
+- name: Add users to docker group
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true
+  become: true

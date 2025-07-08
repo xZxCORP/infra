@@ -1,0 +1,46 @@
+---
+- name: Install iptables-persistent
+  ansible.builtin.package:
+    name:
+      - iptables
+      - iptables-persistent
+    state: present
+  become: true
+
+- name: Set ACCEPT policy for all chains
+  ansible.builtin.iptables:
+    chain: "{{ item }}"
+    policy: ACCEPT
+  loop:
+    - INPUT
+    - FORWARD
+    - OUTPUT
+  become: true
+  notify: Save iptables rules
+
+- name: Flush all existing iptables rules
+  ansible.builtin.iptables:
+    flush: true
+  become: true
+  notify: Save iptables rules
+
+- name: Allow all traffic on all interfaces
+  ansible.builtin.iptables:
+    chain: INPUT
+    jump: ACCEPT
+  become: true
+  notify: Save iptables rules
+
+- name: Allow all forwarded traffic
+  ansible.builtin.iptables:
+    chain: FORWARD
+    jump: ACCEPT
+  become: true
+  notify: Save iptables rules
+
+- name: Allow all outbound traffic
+  ansible.builtin.iptables:
+    chain: OUTPUT
+    jump: ACCEPT
+  become: true
+  notify: Save iptables rules

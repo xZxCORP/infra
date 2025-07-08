@@ -1,3 +1,7 @@
 ---
 docker_swarm_docker_gpg_key_url: "https://download.docker.com/linux/ubuntu/gpg"
 docker_swarm_docker_repository: "deb [arch=arm64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+docker_swarm_role: "manager"
+docker_swarm_advertise_addr: "{{ ansible_default_ipv4.address }}"
+docker_swarm_listen_addr: "0.0.0.0:2377"
+docker_swarm_firewall: true

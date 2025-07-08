@@ -4,3 +4,14 @@
     name: docker
     state: restarted
   become: true
+- name: Save iptables rules
+  ansible.builtin.shell: iptables-save > /etc/iptables/rules.v4
+  become: true
+  changed_when: true
+- name: Swarm_initialized
+  ansible.builtin.debug:
+    msg: "Docker Swarm has been initialized successfully"
+
+- name: Swarm_joined
+  ansible.builtin.debug:
+    msg: "Node has joined the Docker Swarm successfully"

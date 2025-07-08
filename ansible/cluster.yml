@@ -1,10 +1,24 @@
 ---
-- name: Install Docker Swarm
+- name: Install Docker Swarm(master)
   hosts:
     - master
+  roles:
+    - role: docker_swarm
+      vars:
+        docker_swarm_role: "manager"
+  become: true
+  tags:
+    - swarm
+
+- name: Install Docker Swarm(worker)
+  hosts:
     - worker
   roles:
     - role: docker_swarm
+      vars:
+        docker_swarm_role: "worker"
+        docker_swarm_worker_token: "{{ hostvars[groups['master'][0]]['docker_swarm_worker_token'] }}"
+        docker_swarm_manager_endpoint: "{{ hostvars[groups['master'][0]]['docker_swarm_manager_endpoint'] }}"
   become: true
   tags:
     - swarm
