@@ -130,7 +130,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/gpe-vm
           chmod 600 ~/.ssh/gpe-vm
           echo -e "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null" > ~/.ssh/config
-      - name: Run Ansible Playbook
+      - name: Run Ansible infra playbook
         working-directory: ./ansible
         run: |
           if [ "${{ needs.terraform.outputs.infrastructure_changed }}" == "true" ]; then
@@ -139,3 +139,7 @@ jobs:
             echo "L'infrastructure n'a pas changé, mais exécution du playbook Ansible quand même"
           fi
           ansible-playbook infra.yml
+      - name: Run Ansible general services playbook
+        working-directory: ./ansible
+        run: |
+          ansible-playbook cluster.yml --tags general

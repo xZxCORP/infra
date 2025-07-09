@@ -11,3 +11,5 @@
         stack_deploy_compose_files:
           - "stacks/traefik.yml"
         stack_deploy_prune: true
+  tags:
+    - general
