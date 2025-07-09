@@ -138,4 +138,4 @@ jobs:
           else
             echo "L'infrastructure n'a pas changé, mais exécution du playbook Ansible quand même"
           fi
-          ansible-playbook cluster.yml
+          ansible-playbook infra.yml

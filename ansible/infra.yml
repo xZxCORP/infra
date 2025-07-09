@@ -1,0 +1,46 @@
+---
+- name: Install Docker Swarm(master)
+  hosts:
+    - master
+  roles:
+    - role: docker_swarm
+      vars:
+        docker_swarm_role: "manager"
+  become: true
+  tags:
+    - swarm
+
+- name: Install Docker Swarm(worker)
+  hosts:
+    - worker
+  roles:
+    - role: docker_swarm
+      vars:
+        docker_swarm_role: "worker"
+        docker_swarm_worker_token: "{{ hostvars[groups['master'][0]]['docker_swarm_worker_token'] }}"
+        docker_swarm_manager_endpoint: "{{ hostvars[groups['master'][0]]['docker_swarm_manager_endpoint'] }}"
+  become: true
+  tags:
+    - swarm
+- name: Install and configure github runners
+  hosts:
+    - runner
+  roles:
+    - role: github_runner
+      vars:
+        github_runner_api_token: "{{ github_api_token }}"
+        github_runner_organization: "xZxCORP"
+        github_runner_data:
+          - name: "runner1"
+            labels: ["ubuntu-latest"]
+            user: "github-runner"
+            dir: "/opt/github-runner/runner1"
+            architecture: "arm64"
+          - name: "runner2"
+            labels: ["ubuntu-latest"]
+            user: "github-runner"
+            dir: "/opt/github-runner/runner2"
+            architecture: "arm64"
+  become: true
+  tags:
+    - ci

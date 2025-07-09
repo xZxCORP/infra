@@ -1,0 +1,14 @@
+stack_deploy_name: "{{ inventory_hostname }}"
+stack_deploy_compose_files: []
+stack_deploy_dir: "/opt/stacks"
+stack_deploy_action: "deploy"
+
+stack_deploy_resolve_image: "always"
+stack_deploy_prune: false
+stack_deploy_with_registry_auth: true
+
+stack_deploy_env_vars: {}
+stack_deploy_env_file: ""
+
+stack_deploy_absent_retries: 3
+stack_deploy_absent_delay: 10

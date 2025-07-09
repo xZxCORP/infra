@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   traefik:
-    image: traefik:v2.11
+    image: traefik:v3.4.3
     ports:
       - "80:80"
       - "443:443"
@@ -17,7 +17,11 @@ services:
       - --log.level=DEBUG
       - --providers.docker.exposedByDefault=false
       - --providers.docker.network=proxy
-      - --providers.docker.swarmMode=true
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.network=proxy
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --providers.swarm.exposedByDefault=false
+      - --providers.swarm.network=proxy
       - --entrypoints.web.address=:80
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
       - --entryPoints.web.http.redirections.entrypoint.scheme=https
@@ -36,7 +40,7 @@ services:
         - traefik.http.routers.mydashboard.rule=Host(`traefik.zcorp.ovh`)
         - traefik.http.routers.mydashboard.service=api@internal
         - traefik.http.routers.mydashboard.middlewares=myauth
-        - traefik.http.services.mydashboard.loadbalancer.server.port=1337
+        - traefik.http.services.mydashboard.loadbalancer.server.port=8080
         - traefik.http.middlewares.myauth.basicauth.users=admin:$$2y$$05$$LVH5/nqo4PGupl36GEKHjuxLeWKQ2XdYmoe8sQ.xU/L1hRcRJOM5K
 
 volumes:
@@ -44,4 +48,6 @@ volumes:
 
 networks:
   proxy:
-    external: true
+    driver: overlay
+    attachable: true
+    name: proxy

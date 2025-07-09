@@ -1,0 +1,87 @@
+---
+- name: "Validate stack name is defined"
+  ansible.builtin.fail:
+    msg: "stack_deploy_name must be defined"
+  when: stack_deploy_name == ""
+
+- name: "Validate compose files are provided"
+  ansible.builtin.fail:
+    msg: "stack_deploy_compose_files must contain at least one file"
+  when: stack_deploy_compose_files | length == 0
+
+- name: "Create stack directory"
+  ansible.builtin.file:
+    path: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: "Copy compose files"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}/{{ item | basename }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+  loop: "{{ stack_deploy_compose_files }}"
+  when: stack_deploy_action != "remove"
+
+- name: "Generate environment file"
+  ansible.builtin.template:
+    src: .env.j2
+    dest: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}/.env"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0600"
+  when:
+    - stack_deploy_env_vars | length > 0
+    - stack_deploy_action != "remove"
+  no_log: true
+
+- name: "Copy existing environment file"
+  ansible.builtin.copy:
+    src: "{{ stack_deploy_env_file }}"
+    dest: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}/.env"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0600"
+  when:
+    - stack_deploy_env_file != ""
+    - stack_deploy_action != "remove"
+
+- name: "Deploy Docker stack"
+  community.docker.docker_stack:
+    name: "{{ stack_deploy_name }}"
+    compose: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}/{{ item | basename }}"
+    state: present
+    resolve_image: "{{ stack_deploy_resolve_image }}"
+    prune: "{{ stack_deploy_prune }}"
+    with_registry_auth: "{{ stack_deploy_with_registry_auth }}"
+  loop: "{{ stack_deploy_compose_files }}"
+  when: stack_deploy_action == "deploy"
+
+- name: "Update Docker stack"
+  community.docker.docker_stack:
+    name: "{{ stack_deploy_name }}"
+    compose: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}/{{ item | basename }}"
+    state: present
+    resolve_image: "always"
+    prune: "{{ stack_deploy_prune }}"
+    with_registry_auth: "{{ stack_deploy_with_registry_auth }}"
+  loop: "{{ stack_deploy_compose_files }}"
+  when: stack_deploy_action == "update"
+
+- name: "Remove Docker stack"
+  community.docker.docker_stack:
+    name: "{{ stack_deploy_name }}"
+    state: absent
+  retries: "{{ stack_deploy_absent_retries }}"
+  delay: "{{ stack_deploy_absent_delay }}"
+  when: stack_deploy_action == "remove"
+
+- name: "Clean files after stack removal"
+  ansible.builtin.file:
+    path: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}"
+    state: absent
+  when: stack_deploy_action == "remove"
