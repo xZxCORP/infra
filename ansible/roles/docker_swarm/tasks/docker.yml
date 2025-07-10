@@ -12,7 +12,9 @@
       - python3-setuptools
       - python3-jsondiff
     state: present
+    update_cache: true
   become: true
+
 - name: Add Docker GPG key
   ansible.builtin.apt_key:
     url: "{{ docker_swarm_docker_gpg_key_url }}"
