@@ -5,3 +5,7 @@ docker_swarm_role: "manager"
 docker_swarm_advertise_addr: "{{ ansible_default_ipv4.address }}"
 docker_swarm_listen_addr: "0.0.0.0:2377"
 docker_swarm_firewall: true
+docker_swarm_manager_label: "infra"
+docker_swarm_worker_labels:
+  - "persistence" # First worker
+  - "apps" # Second worker

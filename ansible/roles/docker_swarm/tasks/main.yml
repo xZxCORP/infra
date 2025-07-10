@@ -1,9 +1,14 @@
 ---
 - name: Install Docker
   ansible.builtin.include_tasks: docker.yml
+  when: docker_swarm_role in ["manager", "worker"]
+
 - name: Setup firewall rules
   ansible.builtin.include_tasks: firewall.yml
-  when: docker_swarm_firewall | default(true)
+  when:
+    - docker_swarm_firewall | default(true)
+    - docker_swarm_role in ["manager", "worker"]
+
 - name: Setup swarm manager
   ansible.builtin.include_tasks: manager.yml
   when: docker_swarm_role == "manager"
@@ -11,3 +16,7 @@
 - name: Setup swarm worker
   ansible.builtin.include_tasks: worker.yml
   when: docker_swarm_role == "worker"
+
+- name: Apply node labels
+  ansible.builtin.include_tasks: labels.yml
+  when: docker_swarm_role == "labeler"

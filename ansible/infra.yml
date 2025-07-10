@@ -22,6 +22,24 @@
   become: true
   tags:
     - swarm
+
+- name: Apply Docker Swarm node labels
+  hosts:
+    - master[0]
+  roles:
+    - role: docker_swarm
+      vars:
+        docker_swarm_role: "labeler"
+        docker_swarm_manager_label: "infra"
+        docker_swarm_worker_labels:
+          - "persistence"
+          - "apps"
+        docker_swarm_show_labels: true
+  become: true
+  tags:
+    - swarm
+    - labels
+
 - name: Install and configure github runners
   hosts:
     - runner
