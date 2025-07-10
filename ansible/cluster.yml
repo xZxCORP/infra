@@ -11,5 +11,13 @@
         stack_deploy_compose_files:
           - "stacks/traefik.yml"
         stack_deploy_prune: true
+    - name: Deploy Portainer
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "portainer"
+        stack_deploy_compose_files:
+          - "stacks/portainer.yml"
+        stack_deploy_prune: true
   tags:
     - general
