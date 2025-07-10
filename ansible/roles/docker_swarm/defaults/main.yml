@@ -9,3 +9,12 @@ docker_swarm_manager_label: "infra"
 docker_swarm_worker_labels:
   - "persistence" # First worker
   - "apps" # Second worker
+docker_swarm_networks:
+  - name: "proxy"
+    driver: "overlay"
+    attachable: true
+    state: "present"
+  - name: "database"
+    driver: "overlay"
+    attachable: false
+    state: "present"

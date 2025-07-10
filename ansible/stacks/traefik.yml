@@ -46,6 +46,6 @@ volumes:
 
 networks:
   proxy:
-    driver: overlay
-    attachable: true
-    name: proxy
+    external: true
+  database:
+    external: true

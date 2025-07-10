@@ -1,4 +1,29 @@
 ---
+- name: Prepare infrastructure
+  hosts:
+    - master
+    - worker
+  become: true
+  tasks:
+    - name: Create config directory
+      ansible.builtin.file:
+        path: /opt/config
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0755"
+
+    - name: Copy config files
+      ansible.builtin.copy:
+        src: config/
+        dest: /opt/config/
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0644"
+        directory_mode: "0755"
+  tags:
+    - config
+    - always
 - name: Deploy general services
   hosts: master[0]
   become: true
@@ -48,5 +73,17 @@
         stack_deploy_env_vars:
           POSTGRES_USER: "{{ postgres_user }}"
           POSTGRES_PASSWORD: "{{ postgres_password }}"
+    - name: Deploy MongoDB
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "mongodb"
+        stack_deploy_compose_files:
+          - "stacks/mongodb.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          MONGODB_USER: "{{ mongodb_user }}"
+          MONGODB_PASSWORD: "{{ mongodb_password }}"
+          MONGODB_DATABASE: "{{ mongodb_database }}"
   tags:
     - persistence

@@ -33,9 +33,7 @@
 
 - name: Label worker nodes with role
   ansible.builtin.command: >
-    docker node update 
-    --label-add node-role={{ docker_swarm_worker_labels[ansible_loop.index0] | default('apps') }} 
-    {{ item }}
+    docker node update --label-add node-role={{ docker_swarm_worker_labels[ansible_loop.index0] | default('apps') }} {{ item }}
   loop: "{{ worker_nodes.stdout_lines }}"
   loop_control:
     extended: true

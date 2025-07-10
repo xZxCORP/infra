@@ -1,0 +1,9 @@
+---
+- name: Create Docker networks for Swarm
+  community.docker.docker_network:
+    name: "{{ item.name }}"
+    driver: "{{ item.driver }}"
+    attachable: "{{ item.attachable | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
+    scope: "{{ 'swarm' if item.driver == 'overlay' else omit }}"
+  loop: "{{ docker_swarm_networks }}"

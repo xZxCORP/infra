@@ -20,3 +20,6 @@
 - name: Apply node labels
   ansible.builtin.include_tasks: labels.yml
   when: docker_swarm_role == "labeler"
+- name: Create Docker networks
+  ansible.builtin.include_tasks: networks.yml
+  when: docker_swarm_role in ["manager"]

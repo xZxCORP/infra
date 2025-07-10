@@ -16,10 +16,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - proxy
+      - database
 
 networks:
-  proxy:
+  database:
     external: true
 
 volumes:
