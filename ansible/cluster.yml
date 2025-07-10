@@ -19,5 +19,16 @@
         stack_deploy_compose_files:
           - "stacks/portainer.yml"
         stack_deploy_prune: true
+    - name: Deploy RabbitMQ
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "rabbitmq"
+        stack_deploy_compose_files:
+          - "stacks/rabbitmq.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          RABBITMQ_USERNAME: "{{ rabbitmq_username }}"
+          RABBITMQ_PASSWORD: "{{ rabbitmq_password }}"
   tags:
     - general
