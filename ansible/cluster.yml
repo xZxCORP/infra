@@ -32,3 +32,21 @@
           RABBITMQ_PASSWORD: "{{ rabbitmq_password }}"
   tags:
     - general
+
+- name: Deploy persistence services
+  hosts: master[0]
+  become: true
+  tasks:
+    - name: Deploy Postgres
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "postgres"
+        stack_deploy_compose_files:
+          - "stacks/postgres.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          POSTGRES_USER: "{{ postgres_user }}"
+          POSTGRES_PASSWORD: "{{ postgres_password }}"
+  tags:
+    - persistence
