@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  upload:
+    image: zcorp0902746/wheelz-upload-service:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.node-role == apps
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wheelz-upload-service.rule=Host(`wheelz-upload.zcorp.ovh`)
+        - traefik.http.routers.wheelz-upload-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-upload-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-upload-service.loadbalancer.server.port=3000
+    environment:
+      environment:
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: upload_service_db
+      AUTH_SERVICE_URL: http://auth:3000
+      MINIO_USERNAME: ${MINIO_USERNAME}
+      MINIO_PASSWORD: ${MINIO_PASSWORD}
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_BUCKET_NAME: wheelz-upload
+      MINIO_PUBLIC_HOST: https://minio-server.zcorp.ovh
+    networks:
+      - proxy
+      - database
+networks:
+  proxy:
+    external: true
+  database:
+    external: true

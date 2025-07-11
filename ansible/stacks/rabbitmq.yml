@@ -5,9 +5,9 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-
     networks:
       - proxy
+      - database
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     deploy:
@@ -27,6 +27,8 @@ services:
 
 networks:
   proxy:
+    external: true
+  database:
     external: true
 
 volumes:

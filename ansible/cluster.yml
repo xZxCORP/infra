@@ -86,5 +86,129 @@
           MONGODB_USER: "{{ mongodb_user }}"
           MONGODB_PASSWORD: "{{ mongodb_password }}"
           MONGODB_DATABASE: "{{ mongodb_database }}"
+    - name: Deploy MinIO
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "minio"
+        stack_deploy_compose_files:
+          - "stacks/minio.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          MINIO_USERNAME: "{{ minio_username }}"
+          MINIO_PASSWORD: "{{ minio_password }}"
   tags:
     - persistence
+
+- name: Deploy Wheelz services
+  hosts: master[0]
+  become: true
+  tasks:
+    - name: Deploy Wheelz Auth Service
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "wheelz-auth"
+        stack_deploy_compose_files:
+          - "stacks/wheelz/wheelz-auth.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          JWT_SECRET: "{{ jwt_secret }}"
+          POSTGRES_USER: "{{ postgres_user }}"
+          POSTGRES_PASSWORD: "{{ postgres_password }}"
+    - name: Deploy Wheelz User Service
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "wheelz-user"
+        stack_deploy_compose_files:
+          - "stacks/wheelz/wheelz-user.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          POSTGRES_USER: "{{ postgres_user }}"
+          POSTGRES_PASSWORD: "{{ postgres_password }}"
+    - name: Deploy Wheelz Chain Service
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "wheelz-chain"
+        stack_deploy_compose_files:
+          - "stacks/wheelz/wheelz-chain.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          SIGNATURE_ALGORITHM: "{{ signature_algorithm }}"
+          SIGNATURE_PUBLIC: "{{ signature_public }}"
+          SIGNATURE_PRIVATE: "{{ signature_private }}"
+          ADMIN_EMAIL: "{{ admin_email }}"
+          ADMIN_PASSWORD: "{{ admin_password }}"
+          RABBITMQ_USERNAME: "{{ rabbitmq_username }}"
+          RABBITMQ_PASSWORD: "{{ rabbitmq_password }}"
+          POSTGRES_USER: "{{ postgres_user }}"
+          POSTGRES_PASSWORD: "{{ postgres_password }}"
+          MONGODB_USER: "{{ mongodb_user }}"
+          MONGODB_PASSWORD: "{{ mongodb_password }}"
+          MONGODB_DATABASE: "{{ mongodb_database }}"
+    - name: Deploy Wheelz Transaction Service
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "wheelz-transaction"
+        stack_deploy_compose_files:
+          - "stacks/wheelz/wheelz-transaction.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          RABBITMQ_USERNAME: "{{ rabbitmq_username }}"
+          RABBITMQ_PASSWORD: "{{ rabbitmq_password }}"
+          MONGODB_USER: "{{ mongodb_user }}"
+          MONGODB_PASSWORD: "{{ mongodb_password }}"
+          MONGODB_DATABASE: "{{ mongodb_database }}"
+          SIGNATURE_ALGORITHM: "{{ signature_algorithm }}"
+          SIGNATURE_PRIVATE: "{{ signature_private }}"
+          ADMIN_EMAIL: "{{ admin_email }}"
+          ADMIN_PASSWORD: "{{ admin_password }}"
+    - name: Deploy Wheelz Notification Service
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "wheelz-notification"
+        stack_deploy_compose_files:
+          - "stacks/wheelz/wheelz-notification.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          RABBITMQ_USERNAME: "{{ rabbitmq_username }}"
+          RABBITMQ_PASSWORD: "{{ rabbitmq_password }}"
+          SMTP_HOST: "{{ smtp_host }}"
+          SMTP_PORT: "{{ smtp_port }}"
+          SMTP_USERNAME: "{{ smtp_username }}"
+          SMTP_PASSWORD: "{{ smtp_password }}"
+    - name: Deploy Wheelz Goblin Service
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "wheelz-goblin"
+        stack_deploy_compose_files:
+          - "stacks/wheelz/wheelz-goblin.yml"
+        stack_deploy_prune: true
+    - name: Deploy Wheelz Kerek Service
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "wheelz-kerek"
+        stack_deploy_compose_files:
+          - "stacks/wheelz/wheelz-kerek.yml"
+        stack_deploy_prune: true
+    - name: Deploy Wheelz Upload Service
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "wheelz-upload"
+        stack_deploy_compose_files:
+          - "stacks/wheelz/wheelz-upload.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          MINIO_USERNAME: "{{ minio_username }}"
+          MINIO_PASSWORD: "{{ minio_password }}"
+          POSTGRES_USER: "{{ postgres_user }}"
+          POSTGRES_PASSWORD: "{{ postgres_password }}"
+  tags:
+    - wheelz

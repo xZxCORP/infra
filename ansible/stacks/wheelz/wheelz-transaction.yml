@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  transaction:
+    image: zcorp0902746/wheelz-transaction-service:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.node-role == apps
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wheelz-transaction-service.rule=Host(`wheelz-transaction.zcorp.ovh`)
+        - traefik.http.routers.wheelz-transaction-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-transaction-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-transaction-service.loadbalancer.server.port=3000
+    environment:
+      NODE_ENV: production
+      TRANSACTION_QUEUE_URL: amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      TRANSACTION_QUEUE_NEW_NAME: transactions_new
+      TRANSACTION_QUEUE_COMPLETED_NAME: transactions_completed
+      TRANSACTION_REPOSITORY_URL: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongo:27017/?tls=false
+      TRANSACTION_REPOSITORY_DATABASE: ${MONGODB_DATABASE}
+      TRANSACTION_REPOSITORY_COLLECTION: transactions
+      API_HOST: 0.0.0.0
+      API_PORT: 3000
+      DATA_SIGNER_ALGORITHM: ${SIGNATURE_ALGORITHM}
+      DATA_SIGNER_PRIVATE: ${SIGNATURE_PRIVATE}
+      AUTH_SERVICE_URL: http://auth:3000
+      VEHICLE_SCRAPER_URL: http://goblin:80
+      TRANSACTION_VALIDATOR_URL: http://kerek:80
+      CHAIN_SERVICE_URL: http://chain:3000
+      USER_SERVICE_URL: http://user:3000
+      LOG_LEVEL: info
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    networks:
+      - proxy
+      - database
+networks:
+  proxy:
+    external: true
+  database:
+    external: true

@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  notification:
+    image: zcorp0902746/wheelz-notification-service:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.node-role == apps
+      restart_policy:
+        condition: on-failure
+    environment:
+      NODE_ENV: production
+      NOTIFICATION_QUEUE_URL: amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      NOTIFICATION_QUEUE_NAME: notifications
+      MESSAGE_EMITTER_HOST: ${SMTP_HOST}
+      MESSAGE_EMITTER_PORT: ${SMTP_PORT}
+      MESSAGE_EMITTER_USERNAME: ${SMTP_USERNAME}
+      MESSAGE_EMITTER_PASSWORD: ${SMTP_PASSWORD}
+      LOG_LEVEL: info
+    networks:
+      - database
+networks:
+  proxy:
+    external: true
+  database:
+    external: true
