@@ -24,6 +24,7 @@
   tags:
     - config
     - always
+
 - name: Deploy general services
   hosts: master[0]
   become: true
@@ -55,7 +56,16 @@
         stack_deploy_env_vars:
           RABBITMQ_USERNAME: "{{ rabbitmq_username }}"
           RABBITMQ_PASSWORD: "{{ rabbitmq_password }}"
-
+    - name: Deploy Gatus
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "gatus"
+        stack_deploy_compose_files:
+          - "stacks/gatus.yml"
+        stack_deploy_prune: true
+        stack_deploy_env_vars:
+          WEBHOOK_URL: "{{ webhook_url }}"
   tags:
     - general
 
@@ -100,7 +110,7 @@
   tags:
     - persistence
 
-- name: Deploy Wheelz services
+- name: Deploy Wheelz Auth Service
   hosts: master[0]
   become: true
   tasks:
@@ -116,6 +126,14 @@
           JWT_SECRET: "{{ jwt_secret }}"
           POSTGRES_USER: "{{ postgres_user }}"
           POSTGRES_PASSWORD: "{{ postgres_password }}"
+  tags:
+    - wheelz
+    - wheelz_auth
+
+- name: Deploy Wheelz User Service
+  hosts: master[0]
+  become: true
+  tasks:
     - name: Deploy Wheelz User Service
       ansible.builtin.include_role:
         name: stack_deploy
@@ -127,6 +145,14 @@
         stack_deploy_env_vars:
           POSTGRES_USER: "{{ postgres_user }}"
           POSTGRES_PASSWORD: "{{ postgres_password }}"
+  tags:
+    - wheelz
+    - wheelz_user
+
+- name: Deploy Wheelz Chain Service
+  hosts: master[0]
+  become: true
+  tasks:
     - name: Deploy Wheelz Chain Service
       ansible.builtin.include_role:
         name: stack_deploy
@@ -148,6 +174,14 @@
           MONGODB_USER: "{{ mongodb_user }}"
           MONGODB_PASSWORD: "{{ mongodb_password }}"
           MONGODB_DATABASE: "{{ mongodb_database }}"
+  tags:
+    - wheelz
+    - wheelz_chain
+
+- name: Deploy Wheelz Transaction Service
+  hosts: master[0]
+  become: true
+  tasks:
     - name: Deploy Wheelz Transaction Service
       ansible.builtin.include_role:
         name: stack_deploy
@@ -166,6 +200,14 @@
           SIGNATURE_PRIVATE: "{{ signature_private }}"
           ADMIN_EMAIL: "{{ admin_email }}"
           ADMIN_PASSWORD: "{{ admin_password }}"
+  tags:
+    - wheelz
+    - wheelz_transaction
+
+- name: Deploy Wheelz Notification Service
+  hosts: master[0]
+  become: true
+  tasks:
     - name: Deploy Wheelz Notification Service
       ansible.builtin.include_role:
         name: stack_deploy
@@ -181,6 +223,14 @@
           SMTP_PORT: "{{ smtp_port }}"
           SMTP_USERNAME: "{{ smtp_username }}"
           SMTP_PASSWORD: "{{ smtp_password }}"
+  tags:
+    - wheelz
+    - wheelz_notification
+
+- name: Deploy Wheelz Goblin Service
+  hosts: master[0]
+  become: true
+  tasks:
     - name: Deploy Wheelz Goblin Service
       ansible.builtin.include_role:
         name: stack_deploy
@@ -189,6 +239,14 @@
         stack_deploy_compose_files:
           - "stacks/wheelz/wheelz-goblin.yml"
         stack_deploy_prune: true
+  tags:
+    - wheelz
+    - wheelz_goblin
+
+- name: Deploy Wheelz Kerek Service
+  hosts: master[0]
+  become: true
+  tasks:
     - name: Deploy Wheelz Kerek Service
       ansible.builtin.include_role:
         name: stack_deploy
@@ -197,6 +255,14 @@
         stack_deploy_compose_files:
           - "stacks/wheelz/wheelz-kerek.yml"
         stack_deploy_prune: true
+  tags:
+    - wheelz
+    - wheelz_kerek
+
+- name: Deploy Wheelz Upload Service
+  hosts: master[0]
+  become: true
+  tasks:
     - name: Deploy Wheelz Upload Service
       ansible.builtin.include_role:
         name: stack_deploy
@@ -212,3 +278,20 @@
           POSTGRES_PASSWORD: "{{ postgres_password }}"
   tags:
     - wheelz
+    - wheelz_upload
+
+- name: Deploy Wheelz Front Service
+  hosts: master[0]
+  become: true
+  tasks:
+    - name: Deploy Wheelz Front Service
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "wheelz-front"
+        stack_deploy_compose_files:
+          - "stacks/wheelz/wheelz-front.yml"
+        stack_deploy_prune: true
+  tags:
+    - wheelz
+    - wheelz_front

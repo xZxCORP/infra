@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  gatus:
+    image: twinproduction/gatus:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.node-role == infra
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.gatus-service.rule=Host(`gatus.zcorp.ovh`)
+        - traefik.http.routers.gatus-service.entrypoints=websecure
+        - traefik.http.routers.gatus-service.tls.certresolver=myresolver
+        - traefik.http.services.gatus-service.loadbalancer.server.port=8080
+    environment:
+      - GATUS_CONFIG_PATH=/config
+      - WEBHOOK_URL=${WEBHOOK_URL}
+
+    volumes:
+      - /opt/config/gatus:/config
+      - gatus_data:/data
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  gatus_data:

@@ -1,0 +1,20 @@
+storage:
+  type: sqlite
+  path: /data/data.db
+web:
+  port: 8080
+metrics: false
+debug: false
+ui:
+  title: Zcorp Health
+  header: Zcorp
+alerting:
+  discord:
+    webhook-url: ${WEBHOOK_URL}
+    default-alert:
+      description: "health check failed"
+      send-on-resolved: true
+      failure-threshold: 5
+      success-threshold: 5
+
+skip-invalid-config-update: true

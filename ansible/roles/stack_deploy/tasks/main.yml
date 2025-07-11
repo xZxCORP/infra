@@ -1,3 +1,4 @@
+---
 - name: "Validate stack name is defined"
   ansible.builtin.fail:
     msg: "stack_deploy_name must be defined"
@@ -26,65 +27,18 @@
   loop: "{{ stack_deploy_compose_files }}"
   when: stack_deploy_action != "remove"
 
-- name: "Generate environment file"
-  ansible.builtin.template:
-    src: .env.j2
-    dest: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}/.env"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0600"
-  when:
-    - stack_deploy_env_vars | length > 0
-    - stack_deploy_action != "remove"
-  no_log: true
-
-- name: "Copy existing environment file"
-  ansible.builtin.copy:
-    src: "{{ stack_deploy_env_file }}"
-    dest: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}/.env"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0600"
-  when:
-    - stack_deploy_env_file != ""
-    - stack_deploy_action != "remove"
-  no_log: true
-
-- name: "Load environment variables from .env file"
-  ansible.builtin.slurp:
-    src: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}/.env"
-  register: env_file_content
-  when:
-    - stack_deploy_action != "remove"
-    - (stack_deploy_env_vars | length > 0 or stack_deploy_env_file != "")
-  no_log: true
-
-- name: "Parse environment variables from .env file"
-  ansible.builtin.set_fact:
-    env_vars_from_file: "{{ env_vars_from_file | default({}) | combine({item.split('=')[0]: item.split('=')[1:] | join('=')}) }}"
-  loop: "{{ (env_file_content.content | b64decode).split('\n') | select('match', '^[A-Za-z_][A-Za-z0-9_]*=.*$') | list }}"
-  when:
-    - env_file_content is defined
-    - env_file_content.content is defined
-  no_log: true
-
-- name: "Merge environment variables"
-  ansible.builtin.set_fact:
-    final_env_vars: "{{ stack_deploy_env_vars | default({}) | combine(env_vars_from_file | default({})) }}"
-  when: stack_deploy_action != "remove"
-  no_log: true
-
 - name: "Deploy Docker stack"
   community.docker.docker_stack:
     name: "{{ stack_deploy_name }}"
     compose: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}/{{ item | basename }}"
     state: present
-    resolve_image: "{{ stack_deploy_resolve_image }}"
-    prune: "{{ stack_deploy_prune }}"
-    with_registry_auth: "{{ stack_deploy_with_registry_auth }}"
+    resolve_image: "{{ stack_deploy_resolve_image | default('never') }}"
+    prune: "{{ stack_deploy_prune | default(false) }}"
+    with_registry_auth: "{{ stack_deploy_with_registry_auth | default(false) }}"
   loop: "{{ stack_deploy_compose_files }}"
-  environment: "{{ final_env_vars | default({}) }}"
+  environment: "{{ stack_deploy_env_vars | default({}) }}"
   when: stack_deploy_action == "deploy"
+  no_log: true
 
 - name: "Update Docker stack"
   community.docker.docker_stack:
@@ -92,10 +46,10 @@
     compose: "{{ stack_deploy_dir }}/{{ stack_deploy_name }}/{{ item | basename }}"
     state: present
     resolve_image: "always"
-    prune: "{{ stack_deploy_prune }}"
-    with_registry_auth: "{{ stack_deploy_with_registry_auth }}"
+    prune: "{{ stack_deploy_prune | default(false) }}"
+    with_registry_auth: "{{ stack_deploy_with_registry_auth | default(false) }}"
   loop: "{{ stack_deploy_compose_files }}"
-  environment: "{{ final_env_vars | default({}) }}"
+  environment: "{{ stack_deploy_env_vars | default({}) }}"
   when: stack_deploy_action == "update"
   no_log: true
 
@@ -103,8 +57,8 @@
   community.docker.docker_stack:
     name: "{{ stack_deploy_name }}"
     state: absent
-  retries: "{{ stack_deploy_absent_retries }}"
-  delay: "{{ stack_deploy_absent_delay }}"
+  retries: "{{ stack_deploy_absent_retries | default(3) }}"
+  delay: "{{ stack_deploy_absent_delay | default(10) }}"
   when: stack_deploy_action == "remove"
 
 - name: "Clean files after stack removal"
