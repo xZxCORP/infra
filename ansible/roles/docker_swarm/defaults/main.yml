@@ -16,5 +16,5 @@ docker_swarm_networks:
     state: "present"
   - name: "database"
     driver: "overlay"
-    attachable: false
+    attachable: true
     state: "present"

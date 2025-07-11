@@ -3,8 +3,6 @@ version: "3.8"
 services:
   mongo:
     image: "mongo:latest"
-    ports:
-      - "127.0.0.1:27017:27017"
     deploy:
       mode: replicated
       replicas: 1
@@ -12,8 +10,9 @@ services:
         constraints:
           - node.labels.node-role == persistence
     environment:
-      - "MONGODB_INITDB_ROOT_USERNAME=root"
-      - "MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}"
+      - "MONGO_INITDB_ROOT_USERNAME=root"
+      - "MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}"
+      - "MONGO_INITDB_DATABASE=${MONGODB_DATABASE}"
       - "MONGODB_USER=${MONGODB_USER}"
       - "MONGODB_PASSWORD=${MONGODB_PASSWORD}"
       - "MONGODB_DATABASE=${MONGODB_DATABASE}"
@@ -23,8 +22,42 @@ services:
     networks:
       - database
 
+  mongo-express:
+    image: mongo-express:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.node-role == persistence
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.mongo-express.rule=Host(`mongo.zcorp.ovh`)
+        - traefik.http.routers.mongo-express.tls.certresolver=myresolver
+        - traefik.http.services.mongo-express.loadbalancer.server.port=8081
+        # - traefik.http.routers.mongo-express.middlewares=mongo-auth
+        # - traefik.http.middlewares.mongo-auth.basicauth.users=admin:$$2y$$05$$LVH5/nqo4PGupl36GEKHjuxLeWKQ2XdYmoe8sQ.xU/L1hRcRJOM5K
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGODB_PASSWORD}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGODB_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGODB_PASSWORD}
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_SITE_BASEURL: /
+      ME_CONFIG_MONGODB_AUTH_DATABASE: admin
+    networks:
+      - proxy
+      - database
+    depends_on:
+      - mongo
+
 networks:
+  proxy:
+    external: true
   database:
     external: true
+
 volumes:
   mongodb_data:

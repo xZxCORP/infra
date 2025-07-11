@@ -2,8 +2,7 @@ version: "3.9"
 services:
   postgres:
     image: postgres:17.5
-    ports:
-      - "127.0.0.1:5432:5432"
+
     deploy:
       mode: replicated
       replicas: 1
@@ -17,8 +16,33 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - database
-
+  adminer:
+    image: adminer:5.3.0
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.node-role == persistence
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.adminer.rule=Host(`adminer.zcorp.ovh`)"
+        - "traefik.http.routers.adminer.entrypoints=websecure"
+        - "traefik.http.routers.adminer.tls.certresolver=myresolver"
+        - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+        - "traefik.http.routers.adminer.middlewares=adminer-auth"
+        - "traefik.http.middlewares.adminer-auth.basicauth.users=admin:$$2y$$05$$LVH5/nqo4PGupl36GEKHjuxLeWKQ2XdYmoe8sQ.xU/L1hRcRJOM5K"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: galkaev
+    depends_on:
+      - postgres
+    networks:
+      - database
+      - proxy
 networks:
+  proxy:
+    external: true
   database:
     external: true
 
