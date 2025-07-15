@@ -56,6 +56,12 @@
     system: true
     createhome: true
   become: true
+- name: Add github runner user to docker group
+  ansible.builtin.user:
+    name: "{{ github_runner_user }}"
+    groups: docker
+    append: true
+  become: true
 - name: Setup sudoers for GitHub runner (no password)
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/github-runner
