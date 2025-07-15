@@ -2,7 +2,7 @@
   community.docker.docker_network_info:
     name: "{{ item.name }}"
   loop: "{{ docker_swarm_networks }}"
-  register: existing_networks
+  register: docker_swarm_existing_networks
   ignore_errors: true
 
 - name: Create Docker networks for Swarm (only if not existing)
@@ -12,5 +12,5 @@
     attachable: "{{ item.item.attachable | default(omit) }}"
     state: "{{ item.item.state | default('present') }}"
     scope: "{{ 'swarm' if item.item.driver == 'overlay' else omit }}"
-  loop: "{{ existing_networks.results }}"
+  loop: "{{ docker_swarm_existing_networks.results }}"
   when: not item.exists
