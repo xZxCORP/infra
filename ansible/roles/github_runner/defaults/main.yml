@@ -14,3 +14,5 @@ github_runner_user: "github-runner"
 github_runner_base_dir: "/opt/github-runner"
 github_runner_as_service: true
 github_runner_default_architecture: "{{ ansible_architecture | regex_replace('^aarch64$', 'arm64') | regex_replace('^x86_64$', 'x64') }}"
+github_runner_docker_gpg_key_url: "https://download.docker.com/linux/ubuntu/gpg"
+github_runner_docker_repository: "deb [arch=arm64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
