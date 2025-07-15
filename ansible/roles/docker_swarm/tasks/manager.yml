@@ -69,7 +69,7 @@
 
 - name: Get swarm worker token
   ansible.builtin.command: docker swarm join-token worker -q
-  register: worker_token_result
+  register: docker_swarm_worker_token_result
   changed_when: false
   become: true
   when:
@@ -79,10 +79,10 @@
 - name: Set swarm tokens as facts
   ansible.builtin.set_fact:
     docker_swarm_manager_token: "{{ docker_swarm_manager_token_result.stdout }}"
-    docker_swarm_worker_token: "{{ worker_token_result.stdout }}"
+    docker_swarm_worker_token: "{{ docker_swarm_worker_token_result.stdout }}"
     docker_swarm_manager_endpoint: "{{ docker_swarm_advertise_addr | default(ansible_default_ipv4.address) }}:2377"
   delegate_facts: true
   when:
     - docker_swarm_role == "manager"
     - docker_swarm_manager_token_result is defined
-    - worker_token_result is defined
+    - docker_swarm_worker_token_result is defined

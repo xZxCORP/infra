@@ -16,16 +16,16 @@
     - docker_swarm_status.stdout != "active"
     - docker_swarm_worker_token is defined
     - docker_swarm_manager_endpoint is defined
-  register: swarm_worker_join
-  changed_when: swarm_worker_join.rc == 0
+  register: docker_swarm_worker_join
+  changed_when: docker_swarm_worker_join.rc == 0
   become: true
   notify: Swarm_joined
 
 - name: Verify worker joined swarm
   ansible.builtin.command: docker info --format '{{ "{{" }}.Swarm.LocalNodeState{{ "}}" }}'
-  register: verify_worker
+  register: docker_swarm_verify_worker
   changed_when: false
-  failed_when: verify_worker.stdout != "active"
+  failed_when: docker_swarm_verify_worker.stdout != "active"
   become: true
   when: docker_swarm_role == "worker"
 
@@ -33,5 +33,5 @@
   ansible.builtin.debug:
     msg: "Worker {{ inventory_hostname }} joined swarm successfully"
   when:
-    - swarm_worker_join is defined
-    - swarm_worker_join.changed
+    - docker_swarm_worker_join is defined
+    - docker_swarm_worker_join.changed
