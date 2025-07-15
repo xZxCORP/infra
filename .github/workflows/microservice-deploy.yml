@@ -41,6 +41,5 @@ jobs:
           message: |
             ✅ **Deployment successful** for service **${{ github.event.client_payload.microservice_name }}**
             🎯 Action: ${{ github.event.action }}
-            ⏰ Time: ${{ github.event.head_commit.timestamp }}
             🚀 Workflow: ${{ github.workflow }}
             📝 Run ID: ${{ github.run_id }}
