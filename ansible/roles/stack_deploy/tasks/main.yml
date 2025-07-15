@@ -38,7 +38,6 @@
   loop: "{{ stack_deploy_compose_files }}"
   environment: "{{ stack_deploy_env_vars | default({}) }}"
   when: stack_deploy_action == "deploy"
-  no_log: true
 
 - name: "Update Docker stack"
   community.docker.docker_stack:

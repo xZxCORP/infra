@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  grafana:
+    image: grafana/grafana:12.0.2
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.node-role == infra
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.grafana-service.rule=Host(`grafana.zcorp.ovh`)
+        - traefik.http.routers.grafana-service.entrypoints=websecure
+        - traefik.http.routers.grafana-service.tls.certresolver=myresolver
+        - traefik.http.services.grafana-service.loadbalancer.server.port=3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    configs:
+      - source: grafana_config
+        target: /etc/grafana/grafana.ini
+        mode: 0644
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - monitoring
+      - proxy
+networks:
+  monitoring:
+    external: true
+  proxy:
+    external: true
+volumes:
+  grafana_data:
+configs:
+  grafana_config:
+    file: /opt/config/grafana/grafana.ini
+    name: grafana_config_v1.0
