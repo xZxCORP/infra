@@ -1,18 +1,18 @@
 ---
 - name: Check if node is already part of a swarm
   ansible.builtin.command: docker info --format '{{ "{{" }}.Swarm.LocalNodeState{{ "}}" }}'
-  register: swarm_status
+  register: docker_swarm_status
   changed_when: false
   failed_when: false
   become: true
 
 - name: Check if node is manager in existing swarm
   ansible.builtin.command: docker info --format '{{ "{{" }}.Swarm.ControlAvailable{{ "}}" }}'
-  register: swarm_manager_status
+  register: docker_swarm_manager_status
   changed_when: false
   failed_when: false
   become: true
-  when: swarm_status.stdout == "active"
+  when: docker_swarm_status.stdout == "active"
 
 - name: Initialize Docker Swarm on manager
   ansible.builtin.command: >
@@ -21,9 +21,9 @@
     {% if docker_swarm_listen_addr is defined %}--listen-addr {{ docker_swarm_listen_addr }}{% endif %}
   when:
     - docker_swarm_role == "manager"
-    - swarm_status.stdout != "active"
-  register: swarm_init
-  changed_when: swarm_init.rc == 0
+    - docker_swarm_status.stdout != "active"
+  register: docker_swarm_init
+  changed_when: docker_swarm_init.rc == 0
   become: true
   notify: Swarm_initialized
 
@@ -31,8 +31,8 @@
   ansible.builtin.debug:
     msg: "Swarm initialized successfully on {{ inventory_hostname }}"
   when:
-    - swarm_init is defined
-    - swarm_init.changed
+    - docker_swarm_init is defined
+    - docker_swarm_init.changed
 
 - name: Join existing swarm as manager
   ansible.builtin.command: >
@@ -41,31 +41,31 @@
     {{ swarm_manager_endpoint }}
   when:
     - docker_swarm_role == "manager"
-    - swarm_status.stdout != "active"
+    - docker_swarm_status.stdout != "active"
     - swarm_manager_token is defined
     - swarm_manager_endpoint is defined
-    - not (swarm_init is defined and swarm_init.changed)
-  register: swarm_manager_join
-  changed_when: swarm_manager_join.rc == 0
+    - not (docker_swarm_init is defined and docker_swarm_init.changed)
+  register: docker_swarm_manager_join
+  changed_when: docker_swarm_manager_join.rc == 0
   become: true
   notify: Swarm_joined
 
 - name: Verify swarm manager status
   ansible.builtin.command: docker info --format '{{ "{{" }}.Swarm.ControlAvailable{{ "}}" }}'
-  register: verify_manager
+  register: docker_swarm_verify_manager
   changed_when: false
-  failed_when: verify_manager.stdout != "true"
+  failed_when: docker_swarm_verify_manager.stdout != "true"
   become: true
   when: docker_swarm_role == "manager"
 
 - name: Get swarm manager token
   ansible.builtin.command: docker swarm join-token manager -q
-  register: manager_token_result
+  register: docker_swarm_manager_token_result
   changed_when: false
   become: true
   when:
     - docker_swarm_role == "manager"
-    - (swarm_status.stdout == "active" or swarm_init.changed is defined)
+    - (docker_swarm_status.stdout == "active" or docker_swarm_init.changed is defined)
 
 - name: Get swarm worker token
   ansible.builtin.command: docker swarm join-token worker -q
@@ -74,15 +74,15 @@
   become: true
   when:
     - docker_swarm_role == "manager"
-    - (swarm_status.stdout == "active" or swarm_init.changed is defined)
+    - (docker_swarm_status.stdout == "active" or docker_swarm_init.changed is defined)
 
 - name: Set swarm tokens as facts
   ansible.builtin.set_fact:
-    docker_swarm_manager_token: "{{ manager_token_result.stdout }}"
+    docker_swarm_manager_token: "{{ docker_swarm_manager_token_result.stdout }}"
     docker_swarm_worker_token: "{{ worker_token_result.stdout }}"
     docker_swarm_manager_endpoint: "{{ docker_swarm_advertise_addr | default(ansible_default_ipv4.address) }}:2377"
   delegate_facts: true
   when:
     - docker_swarm_role == "manager"
-    - manager_token_result is defined
+    - docker_swarm_manager_token_result is defined
     - worker_token_result is defined

@@ -1,0 +1,44 @@
+name: Microservice Deployment Workflow
+on:
+  repository_dispatch:
+    types: [deploy-microservice]
+
+jobs:
+  deploy-microservice:
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+          ansible-galaxy collection install -r ./ansible/requirements.yml
+      - name: Create vault password file
+        run: |
+          echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > ./ansible/.vault-pass.txt
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/gpe-vm
+          chmod 600 ~/.ssh/gpe-vm
+          echo -e "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null" > ~/.ssh/config
+      - name: Print received payload
+        run: |
+          echo "Action: ${{ github.event.action }}"
+          echo "Microservice: ${{ github.event.client_payload.microservice_name }}"
+      - name: Run Ansible general services playbook
+        working-directory: ./ansible
+        run: |
+          ansible-playbook cluster.yml --tags "${{ github.event.client_payload.microservice_name }}"
+      - name: Send Discord notification
+        uses: appleboy/discord-action@v1.2.0
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          message: |
+            ✅ **Deployment successful** for service **${{ github.event.client_payload.microservice_name }}**
+            🎯 Action: ${{ github.event.action }}
+            ⏰ Time: $(date -u)

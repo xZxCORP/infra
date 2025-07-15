@@ -1,50 +1,50 @@
 ---
 - name: Get manager nodes
   ansible.builtin.command: docker node ls --filter role=manager --format '{{ "{{" }}.Hostname{{ "}}" }}'
-  register: manager_nodes
+  register: docker_swarm_manager_nodes
   changed_when: false
   become: true
 
 - name: Get worker nodes in order
   ansible.builtin.command: docker node ls --filter role=worker --format '{{ "{{" }}.Hostname{{ "}}" }}'
-  register: worker_nodes
+  register: docker_swarm_worker_nodes
   changed_when: false
   become: true
 
 - name: Set worker nodes mapping
   ansible.builtin.set_fact:
-    workers_mapping: "{{ workers_mapping | default({}) | combine({item.0: docker_swarm_worker_labels[item.0] | default('apps')}) }}"
-  loop: "{{ worker_nodes.stdout_lines | zip(range(worker_nodes.stdout_lines | length)) | list }}"
-  when: worker_nodes.stdout_lines | length > 0
+    docker_swarm_workers_mapping: "{{ docker_swarm_workers_mapping | default({}) | combine({item.0: docker_swarm_worker_labels[item.0] | default('apps')}) }}"
+  loop: "{{ docker_swarm_worker_nodes.stdout_lines | zip(range(docker_swarm_worker_nodes.stdout_lines | length)) | list }}"
+  when: docker_swarm_worker_nodes.stdout_lines | length > 0
 
 - name: Label manager nodes
   ansible.builtin.command: docker node update --label-add node-role={{ docker_swarm_manager_label | default('infra') }} {{ item }}
-  with_items: "{{ manager_nodes.stdout_lines }}"
-  when: manager_nodes.stdout_lines | length > 0
+  with_items: "{{ docker_swarm_manager_nodes.stdout_lines }}"
+  when: docker_swarm_manager_nodes.stdout_lines | length > 0
   become: true
   changed_when: true
 
 - name: Label manager nodes with type
   ansible.builtin.command: docker node update --label-add node-type=manager {{ item }}
-  with_items: "{{ manager_nodes.stdout_lines }}"
-  when: manager_nodes.stdout_lines | length > 0
+  with_items: "{{ docker_swarm_manager_nodes.stdout_lines }}"
+  when: docker_swarm_manager_nodes.stdout_lines | length > 0
   become: true
   changed_when: true
 
 - name: Label worker nodes with role
   ansible.builtin.command: >
     docker node update --label-add node-role={{ docker_swarm_worker_labels[ansible_loop.index0] | default('apps') }} {{ item }}
-  loop: "{{ worker_nodes.stdout_lines }}"
+  loop: "{{ docker_swarm_worker_nodes.stdout_lines }}"
   loop_control:
     extended: true
-  when: worker_nodes.stdout_lines | length > 0
+  when: docker_swarm_worker_nodes.stdout_lines | length > 0
   become: true
   changed_when: true
 
 - name: Label worker nodes with type
   ansible.builtin.command: docker node update --label-add node-type=worker {{ item }}
-  with_items: "{{ worker_nodes.stdout_lines }}"
-  when: worker_nodes.stdout_lines | length > 0
+  with_items: "{{ docker_swarm_worker_nodes.stdout_lines }}"
+  when: docker_swarm_worker_nodes.stdout_lines | length > 0
   become: true
   changed_when: true
 
@@ -61,15 +61,15 @@
   ansible.builtin.debug:
     msg: |
       Node labeling completed:
-      - Manager(s) ({{ docker_swarm_manager_label | default('infra') }}): {{ manager_nodes.stdout_lines | join(', ') }}
-      {% for worker in worker_nodes.stdout_lines %}
+      - Manager(s) ({{ docker_swarm_manager_label | default('infra') }}): {{ docker_swarm_manager_nodes.stdout_lines | join(', ') }}
+      {% for worker in docker_swarm_worker_nodes.stdout_lines %}
       - Worker {{ loop.index }} ({{ docker_swarm_worker_labels[loop.index0] | default('apps') }}): {{ worker }}
       {% endfor %}
 
 - name: Get final node labels
   ansible.builtin.command: docker node inspect {{ item }} --format '{{ "{{" }}.Spec.Labels{{ "}}" }}'
-  register: node_labels_result
-  with_items: "{{ (manager_nodes.stdout_lines + worker_nodes.stdout_lines) | unique }}"
+  register: docker_swarm_node_labels_result
+  with_items: "{{ (docker_swarm_manager_nodes.stdout_lines + docker_swarm_worker_nodes.stdout_lines) | unique }}"
   changed_when: false
   become: true
   when: docker_swarm_show_labels | default(false)
@@ -77,7 +77,7 @@
 - name: Show detailed node labels
   ansible.builtin.debug:
     msg: "{{ item.item }}: {{ item.stdout }}"
-  with_items: "{{ node_labels_result.results }}"
+  with_items: "{{ docker_swarm_node_labels_result.results }}"
   when:
     - docker_swarm_show_labels | default(false)
-    - node_labels_result is defined
+    - docker_swarm_node_labels_result is defined

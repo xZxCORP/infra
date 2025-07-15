@@ -1,7 +1,7 @@
 ---
 - name: Check if node is already part of a swarm
   ansible.builtin.command: docker info --format '{{ "{{" }}.Swarm.LocalNodeState{{ "}}" }}'
-  register: swarm_status
+  register: docker_swarm_status
   changed_when: false
   failed_when: false
   become: true
@@ -13,7 +13,7 @@
     {{ docker_swarm_manager_endpoint }}
   when:
     - docker_swarm_role == "worker"
-    - swarm_status.stdout != "active"
+    - docker_swarm_status.stdout != "active"
     - docker_swarm_worker_token is defined
     - docker_swarm_manager_endpoint is defined
   register: swarm_worker_join
