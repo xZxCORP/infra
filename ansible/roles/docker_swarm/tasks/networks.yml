@@ -1,9 +1,16 @@
----
-- name: Create Docker networks for Swarm
-  community.docker.docker_network:
+- name: Check if Docker networks exist
+  community.docker.docker_network_info:
     name: "{{ item.name }}"
-    driver: "{{ item.driver }}"
-    attachable: "{{ item.attachable | default(omit) }}"
-    state: "{{ item.state | default('present') }}"
-    scope: "{{ 'swarm' if item.driver == 'overlay' else omit }}"
   loop: "{{ docker_swarm_networks }}"
+  register: existing_networks
+  ignore_errors: true
+
+- name: Create Docker networks for Swarm (only if not existing)
+  community.docker.docker_network:
+    name: "{{ item.item.name }}"
+    driver: "{{ item.item.driver }}"
+    attachable: "{{ item.item.attachable | default(omit) }}"
+    state: "{{ item.item.state | default('present') }}"
+    scope: "{{ 'swarm' if item.item.driver == 'overlay' else omit }}"
+  loop: "{{ existing_networks.results }}"
+  when: not item.exists
