@@ -58,8 +58,8 @@
   become: true
   args:
     creates: "{{ github_runner_current_runner_dir }}/installed_dependencies"
-  register: github_dependencies_result
-  changed_when: github_dependencies_result.rc == 0
+  register: github_runner_dependencies_result
+  changed_when: github_runner_dependencies_result.rc == 0
 
 - name: Prepare the runner configuration
   ansible.builtin.set_fact:
