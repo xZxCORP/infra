@@ -14,6 +14,10 @@ docker_swarm_networks:
     driver: "overlay"
     attachable: true
     state: "present"
+  - name: "monitoring"
+    driver: "overlay"
+    attachable: true
+    state: "present"
   - name: "database"
     driver: "overlay"
     attachable: true
