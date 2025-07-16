@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.node-role == infra
+      restart_policy:
+        condition: on-failure
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    configs:
+      - source: prometheus_config
+        target: /etc/prometheus/prometheus.yml
+    volumes:
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring
+networks:
+  monitoring:
+    external: true
+volumes:
+  prometheus_data:
+configs:
+  prometheus_config:
+    file: /opt/config/prometheus/prometheus.yml
+    name: prometheus_config_v1.0

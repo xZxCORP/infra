@@ -113,6 +113,22 @@
   hosts: master[0]
   become: true
   tasks:
+    - name: Deploy Prometheus
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "prometheus"
+        stack_deploy_compose_files:
+          - "stacks/monitoring/prometheus.yml"
+        stack_deploy_prune: true
+    - name: Deploy Loki
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "loki"
+        stack_deploy_compose_files:
+          - "stacks/monitoring/loki.yml"
+        stack_deploy_prune: true
     - name: Deploy Grafana
       ansible.builtin.include_role:
         name: stack_deploy

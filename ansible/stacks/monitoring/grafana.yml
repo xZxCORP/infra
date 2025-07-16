@@ -20,9 +20,14 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+
     configs:
       - source: grafana_config
         target: /etc/grafana/grafana.ini
+        mode: 0644
+      - source: grafana_datasources
+        target: /etc/grafana/provisioning/datasources/datasources.yaml
         mode: 0644
     volumes:
       - grafana_data:/var/lib/grafana
@@ -40,3 +45,6 @@ configs:
   grafana_config:
     file: /opt/config/grafana/grafana.ini
     name: grafana_config_v1.0
+  grafana_datasources:
+    file: /opt/config/grafana/provisioning/datasources.yaml
+    name: grafana_datasources_v1.0
