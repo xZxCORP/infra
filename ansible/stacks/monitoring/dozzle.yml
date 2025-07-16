@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  dozzle:
+    image: amir20/dozzle:v8.13
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.dozzle.rule=Host(`dozzle.zcorp.ovh`)"
+        - "traefik.http.routers.dozzle.entrypoints=websecure"
+        - "traefik.http.routers.dozzle.tls.certresolver=myresolver"
+        - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
+    environment:
+      - DOZZLE_MODE=swarm
+      - DOZZLE_AUTH_PROVIDER=simple
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    secrets:
+      - source: users
+        target: /data/users.yml
+    networks:
+      - monitoring
+      - proxy
+
+networks:
+  monitoring:
+    external: true
+  proxy:
+    external: true
+
+secrets:
+  users:
+    file: /opt/config/dozzle/users.yml
+    name: dozzle_users_v1.0

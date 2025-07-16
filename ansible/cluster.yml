@@ -113,41 +113,15 @@
   hosts: master[0]
   become: true
   tasks:
-    - name: Deploy Prometheus
+    - name: Deploy Dozzle
       ansible.builtin.include_role:
         name: stack_deploy
       vars:
-        stack_deploy_name: "prometheus"
+        stack_deploy_name: "dozzle"
         stack_deploy_compose_files:
-          - "stacks/monitoring/prometheus.yml"
+          - "stacks/monitoring/dozzle.yml"
         stack_deploy_prune: true
-    - name: Deploy Loki
-      ansible.builtin.include_role:
-        name: stack_deploy
-      vars:
-        stack_deploy_name: "loki"
-        stack_deploy_compose_files:
-          - "stacks/monitoring/loki.yml"
-        stack_deploy_prune: true
-    - name: Deploy Alloy
-      ansible.builtin.include_role:
-        name: stack_deploy
-      vars:
-        stack_deploy_name: "alloy"
-        stack_deploy_compose_files:
-          - "stacks/monitoring/alloy.yml"
-        stack_deploy_prune: true
-    - name: Deploy Grafana
-      ansible.builtin.include_role:
-        name: stack_deploy
-      vars:
-        stack_deploy_name: "grafana"
-        stack_deploy_compose_files:
-          - "stacks/monitoring/grafana.yml"
-        stack_deploy_prune: true
-        stack_deploy_env_vars:
-          GRAFANA_ADMIN_USER: "{{ grafana_admin_user }}"
-          GRAFANA_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
+
   tags:
     - monitoring
 - name: Deploy Wheelz Auth Service

@@ -1,0 +1,6 @@
+users:
+  admin:
+    email: admin@wheelz.fr
+    name: Wheelz
+    password: $2a$11$0r7xFJoGd1Ot6vZFyI1lvudob.5gJ/qothIbIUcqNjnDW80DGPmcK
+    filter: ""
