@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  alloy:
+    image: grafana/alloy:v1.9.2
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+    command:
+      - "run"
+      - "--server.http.listen-addr=0.0.0.0:12345"
+      - "--storage.path=/var/lib/alloy/data"
+      - "/etc/alloy/config.alloy"
+    environment:
+      - HOSTNAME={{.Node.Hostname}}
+    configs:
+      - source: alloy_config
+        target: /etc/alloy/config.alloy
+        mode: 0644
+    volumes:
+      - alloy_data:/var/lib/alloy/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/host/sys:ro
+      - /proc:/host/proc:ro
+      - /var/log:/var/log:ro
+    networks:
+      - monitoring
+    user: "0"
+networks:
+  monitoring:
+    external: true
+volumes:
+  alloy_data:
+configs:
+  alloy_config:
+    file: /opt/config/alloy/config.alloy
+    name: alloy_config_v1.7

@@ -29,8 +29,13 @@ services:
       - source: grafana_datasources
         target: /etc/grafana/provisioning/datasources/datasources.yaml
         mode: 0644
+      - source: grafana_dashboards_config
+        target: /etc/grafana/provisioning/dashboards/dashboards.yaml
+        mode: 0644
     volumes:
       - grafana_data:/var/lib/grafana
+      - /opt/config/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+
     networks:
       - monitoring
       - proxy
@@ -48,3 +53,6 @@ configs:
   grafana_datasources:
     file: /opt/config/grafana/provisioning/datasources.yaml
     name: grafana_datasources_v1.0
+  grafana_dashboards_config:
+    file: /opt/config/grafana/provisioning/dashboards/dashboards.yaml
+    name: grafana_dashboards_config_v1.0

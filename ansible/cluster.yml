@@ -129,6 +129,14 @@
         stack_deploy_compose_files:
           - "stacks/monitoring/loki.yml"
         stack_deploy_prune: true
+    - name: Deploy Alloy
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "alloy"
+        stack_deploy_compose_files:
+          - "stacks/monitoring/alloy.yml"
+        stack_deploy_prune: true
     - name: Deploy Grafana
       ansible.builtin.include_role:
         name: stack_deploy

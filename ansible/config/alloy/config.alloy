@@ -1,0 +1,103 @@
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+  refresh_interval = "10s"
+}
+
+prometheus.scrape "docker_containers" {
+  targets = discovery.docker.containers.targets
+  forward_to = [prometheus.remote_write.prometheus.receiver]
+  
+  scrape_interval = "15s"
+  metrics_path = "/metrics"
+}
+
+prometheus.remote_write "prometheus" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+loki.source.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+  targets = discovery.docker.containers.targets
+  forward_to = [loki.relabel.containers.receiver]
+}
+
+loki.relabel "containers" {
+  forward_to = [loki.write.loki.receiver]
+  
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    target_label = "container_name"
+  }
+  
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_swarm_service_name"]
+    target_label = "service_name"
+  }
+  
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_swarm_node_id"]
+    target_label = "node_id"
+  }
+}
+
+loki.write "loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+prometheus.exporter.unix "system" {
+  procfs_path = "/host/proc"
+  sysfs_path = "/host/sys"
+  rootfs_path = "/host/root"
+}
+
+prometheus.relabel "system_metrics" {
+  forward_to = [prometheus.remote_write.prometheus.receiver]
+  
+  rule {
+    target_label = "instance"
+    replacement = env("HOSTNAME")
+  }
+  
+  rule {
+    target_label = "nodename"
+    replacement = env("HOSTNAME")
+  }
+}
+
+prometheus.scrape "system_metrics" {
+  targets = prometheus.exporter.unix.system.targets
+  forward_to = [prometheus.relabel.system_metrics.receiver]
+  
+  scrape_interval = "15s"
+  job_name = "node-exporter"
+}
+
+prometheus.exporter.cadvisor "containers" {
+  docker_host = "unix:///var/run/docker.sock"
+}
+
+prometheus.relabel "cadvisor_metrics" {
+  forward_to = [prometheus.remote_write.prometheus.receiver]
+  
+  rule {
+    target_label = "instance"
+    replacement = env("HOSTNAME")
+  }
+  
+  rule {
+    target_label = "nodename"
+    replacement = env("HOSTNAME")
+  }
+}
+
+prometheus.scrape "cadvisor_metrics" {
+  targets = prometheus.exporter.cadvisor.containers.targets
+  forward_to = [prometheus.relabel.cadvisor_metrics.receiver]
+  
+  scrape_interval = "15s"
+  job_name = "cadvisor"
+}
