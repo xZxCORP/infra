@@ -2,7 +2,6 @@ version: "3.9"
 services:
   postgres:
     image: postgres:17.5
-
     deploy:
       mode: replicated
       replicas: 1
@@ -12,8 +11,13 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    configs:
+      - source: custom_entrypoint_config
+        target: /custom-entrypoint.sh
+        mode: 0755
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    entrypoint: ["/custom-entrypoint.sh"]
     networks:
       - database
   adminer:
@@ -45,6 +49,9 @@ networks:
     external: true
   database:
     external: true
-
+configs:
+  custom_entrypoint_config:
+    file: /opt/config/postgres/custom-entrypoint.sh
+    name: custom_entrypoint_config_v1.1
 volumes:
   postgres_data:
