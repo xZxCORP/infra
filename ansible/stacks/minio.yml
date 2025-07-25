@@ -9,7 +9,6 @@ services:
       MINIO_ROOT_USER: ${MINIO_USERNAME}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
       MINIO_BROWSER_REDIRECT_URL: https://minio-ui.zcorp.ovh
-
     command: server /data --console-address ":9001"
     networks:
       - proxy
@@ -34,6 +33,37 @@ services:
         - traefik.http.routers.minio-ui.tls.certresolver=myresolver
         - traefik.http.routers.minio-ui.service=minio-ui
         - traefik.http.services.minio-ui.loadbalancer.server.port=9001
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    environment:
+      MINIO_USERNAME: ${MINIO_USERNAME}
+      MINIO_PASSWORD: ${MINIO_PASSWORD}
+    networks:
+      - database
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Waiting for MinIO to be ready...';
+      until /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_USERNAME} ${MINIO_PASSWORD}; do 
+        echo 'MinIO not ready yet, retrying in 2 seconds...'; 
+        sleep 2; 
+      done;
+      echo 'MinIO is ready, creating bucket...';
+      /usr/bin/mc mb myminio/docmost --ignore-existing;
+      echo 'Setting bucket policy to download (read-only public access)...';
+      /usr/bin/mc anonymous set download myminio/docmost;
+      echo 'Bucket docmost created and configured successfully!';
+      exit 0;
+      "
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
 
 networks:
   proxy:

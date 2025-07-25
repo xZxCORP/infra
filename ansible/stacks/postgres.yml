@@ -52,6 +52,6 @@ networks:
 configs:
   custom_entrypoint_config:
     file: /opt/config/postgres/custom-entrypoint.sh
-    name: custom_entrypoint_config_v1.1
+    name: custom_entrypoint_config_v1.2
 volumes:
   postgres_data:
