@@ -12,4 +12,8 @@ if ! psql -U "$POSTGRES_USER" -lqt | cut -d \| -f 1 | grep -qw docmost; then
     psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "CREATE DATABASE docmost;"
 fi
 
+if ! psql -U "$POSTGRES_USER" -lqt | cut -d \| -f 1 | grep -qw outline; then
+    psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "CREATE DATABASE outline;"
+fi
+
 wait $POSTGRES_PID

@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "description": "Configuration des buckets MinIO pour différents services",
+  "buckets": [
+    {
+      "name": "outline-bucket",
+      "description": "Stockage des fichiers et images pour Outline",
+      "public_read": true,
+      "cors": {
+        "enabled": true,
+        "rules": [
+          {
+            "id": "OutlineUpload",
+            "allowed_origins": ["https://outline.zcorp.ovh"],
+            "allowed_methods": ["PUT", "POST"],
+            "allowed_headers": ["*"],
+            "expose_headers": []
+          },
+          {
+            "id": "PublicRead",
+            "allowed_origins": ["*"],
+            "allowed_methods": ["GET"],
+            "allowed_headers": [],
+            "expose_headers": []
+          }
+        ]
+      },
+      "versioning": false,
+      "lifecycle": {
+        "enabled": false
+      },
+      "block_public_acls": false,
+      "create_iam_user": true
+    }
+  ]
+}

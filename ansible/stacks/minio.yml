@@ -35,35 +35,48 @@ services:
         - traefik.http.services.minio-ui.loadbalancer.server.port=9001
 
   minio-init:
-    image: minio/mc:latest
+    image: alpine:latest
     depends_on:
       - minio
     environment:
       MINIO_USERNAME: ${MINIO_USERNAME}
       MINIO_PASSWORD: ${MINIO_PASSWORD}
+    configs:
+      - source: minio_buckets_config
+        target: /buckets-config.json
+        mode: 0755
+      - source: minio_init_script
+        target: /configure-buckets.sh
+        mode: 0755
     networks:
       - database
-    entrypoint: >
-      /bin/sh -c "
-      echo 'Waiting for MinIO to be ready...';
-      until /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_USERNAME} ${MINIO_PASSWORD}; do 
-        echo 'MinIO not ready yet, retrying in 2 seconds...'; 
-        sleep 2; 
-      done;
-      echo 'MinIO is ready, creating bucket...';
-      /usr/bin/mc mb myminio/docmost --ignore-existing;
-      echo 'Setting bucket policy to download (read-only public access)...';
-      /usr/bin/mc anonymous set download myminio/docmost;
-      echo 'Bucket docmost created and configured successfully!';
-      exit 0;
-      "
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints:
+          - node.labels.node-role == persistence
       restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 5
+        condition: none
+    entrypoint: ["/bin/sh"]
+    command: >
+      -c "
+        echo '🚀 Démarrage de l initialisation MinIO...'
+        apk add --no-cache jq curl netcat-openbsd openssl
+        echo '🔧 Téléchargement de mc...'
+        curl -O https://dl.min.io/client/mc/release/linux-arm64/mc && chmod +x mc && mv mc /usr/local/bin/
+        echo '🔧 Attente que MinIO soit complètement démarré...'
+        echo '🔧 Exécution du script de configuration...'
+        /configure-buckets.sh
+      "
+
+configs:
+  minio_buckets_config:
+    file: /opt/config/minio/buckets-config.json
+    name: minio_buckets_config_v1.5
+  minio_init_script:
+    file: /opt/config/minio/configure-buckets.sh
+    name: minio_init_script_v1.5
 
 networks:
   proxy:

@@ -18,22 +18,36 @@ services:
         - traefik.http.services.outline.loadbalancer.server.port=3000
     environment:
       NODE_ENV: "production"
+      URL: "https://outline.zcorp.ovh"
       PORT: 3000
       WEB_CONCURRENCY: 1
       SECRET_KEY: ${OUTLINE_SECRET_KEY}
       UTILS_SECRET: ${OUTLINE_UTILS_SECRET_KEY}
-      DEFAULT_LANGUAGE: "fr"
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/outline?schema=public"
+      DEFAULT_LANGUAGE: "fr_FR"
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/outline?sslmode=disable"
       REDIS_URL: "redis://redis:6379"
       FILE_STORAGE: "s3"
       AWS_ACCESS_KEY_ID: ${MINIO_USERNAME}
       AWS_SECRET_ACCESS_KEY: ${MINIO_PASSWORD}
       AWS_REGION: "us-east-1"
-      AWS_S3_UPLOAD_BUCKET_NAME: "outline"
+      AWS_S3_UPLOAD_BUCKET_NAME: "outline-bucket"
       AWS_S3_UPLOAD_BUCKET_URL: "https://minio-server.zcorp.ovh"
       AWS_S3_FORCE_PATH_STYLE: "true"
+      FORCE_HTTPS: "true"
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      NOTION_CLIENT_ID: ${NOTION_CLIENT_ID}
+      NOTION_CLIENT_SECRET: ${NOTION_CLIENT_SECRET}
+      SMTP_SERVICE: "Gmail"
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      ENABLE_UPDATES: "true"
+      LOG_LEVEL: "info"
     volumes:
       - outline_data:/app/data/storage
+    networks:
+      - proxy
+      - database
 networks:
   database:
     external: true
