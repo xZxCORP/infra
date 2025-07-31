@@ -44,10 +44,10 @@ services:
     configs:
       - source: minio_buckets_config
         target: /buckets-config.json
-        mode: "0755"
+        mode: 0755
       - source: minio_init_script
         target: /configure-buckets.sh
-        mode: "0755"
+        mode: 0755
     networks:
       - database
     deploy:
