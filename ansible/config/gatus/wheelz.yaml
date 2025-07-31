@@ -8,6 +8,26 @@ endpoints:
     alerts:
       - type: discord
         description: "Wheelz Front Service is down"
+  - name: Check User Service
+    group: Wheelz
+    url: "https://wheelz-user.zcorp.ovh/health"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY].status == healthy"
+    alerts:
+      - type: discord
+        description: "Wheelz User Service is down"
+  - name: Check Auth Service
+    group: Wheelz
+    url: "https://wheelz-auth.zcorp.ovh/health"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY].status == healthy"
+    alerts:
+      - type: discord
+        description: "Wheelz Auth Service is down"
   - name: Check Transaction Service
     group: Wheelz
     url: "https://wheelz-transaction.zcorp.ovh/health"

@@ -14,7 +14,7 @@ services:
     configs:
       - source: custom_entrypoint_config
         target: /custom-entrypoint.sh
-        mode: 0755
+        mode: "0755"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     entrypoint: ["/custom-entrypoint.sh"]
