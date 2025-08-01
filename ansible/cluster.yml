@@ -344,3 +344,19 @@
   tags:
     - wheelz
     - wheelz_front
+
+- name: Deploy Wheelz Blog Post Service
+  hosts: master[0]
+  become: true
+  tasks:
+    - name: Deploy Wheelz Blog Post Service
+      ansible.builtin.include_role:
+        name: stack_deploy
+      vars:
+        stack_deploy_name: "wheelz-blog-post"
+        stack_deploy_compose_files:
+          - "stacks/wheelz/wheelz-blog-post.yml"
+        stack_deploy_prune: true
+  tags:
+    - wheelz
+    - wheelz_blog_post

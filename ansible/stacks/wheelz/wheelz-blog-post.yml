@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  auth:
+    image: zcorp0902746/wheelz-blog-post-service:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.node-role == apps
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.wheelz-blog-post-service.rule=Host(`wheelz-blog-post.zcorp.ovh`)
+        - traefik.http.routers.wheelz-blog-post-service.entrypoints=websecure
+        - traefik.http.routers.wheelz-blog-post-service.tls.certresolver=myresolver
+        - traefik.http.services.wheelz-blog-post-service.loadbalancer.server.port=3000
+    environment:
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: blog_post_service_db
+      AUTH_SERVICE_URL: http://auth:3000
+    networks:
+      - proxy
+      - database
+networks:
+  proxy:
+    external: true
+  database:
+    external: true
